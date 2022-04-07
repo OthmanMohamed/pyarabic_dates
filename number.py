@@ -237,7 +237,7 @@ def text2number(text):
             word = word[1:]
         if word != u'واحد' and word.startswith(u'و'):
             word = word[1:]
-        if word.startswith(u'ال') and not word[2]==u'ف':
+        if word.startswith(u'ال') and not (word[2]==u'ف' or word.startswith(u'الاف')):
             word = word[2:]
 
         if word in nbconst.NUMBER_WORDS:
@@ -586,7 +586,7 @@ def detect_number_phrases_position(wordlist):
         elif word_nm != u'واحد' and word_nm.startswith(u'و'):
             key = word_nm[1:]
             # print("KEY : ", key)
-        if word_nm and key[0:2] in (u'ال') and not key[2] == u'ف' :
+        if word_nm and key[0:2] in (u'ال') and not (key[2] == u'ف' or key.startswith(u'الاف')) :
             key = key[2:]
             # print("KEY : ", key)
         if key in nbconst.NUMBER_WORDS or key.isnumeric():
