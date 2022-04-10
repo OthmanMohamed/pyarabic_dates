@@ -5,6 +5,22 @@ from pyarabic.number_const import UNITS_ORDINAL_WORDS, COMPLICATIONS
 from pyarabic import araby
 from dates_const import ACCEPT_NUMBER_PREFIX, MONTH_WORDS, YEARS_REPLACE
 
+def prepare_txt(txt):
+    for word in YEARS_REPLACE:
+        if txt.find(word) != -1 and txt.find("وعشرين") == -1:
+            txt = txt.replace(word, YEARS_REPLACE[word])
+    txt = txt.replace(u'و ', u'و')
+    wordlist = araby.tokenize(txt)
+    inv_UNITS_ORDINAL_WORDS = {v: k for k, v in UNITS_ORDINAL_WORDS.items()}
+    for i, word in enumerate(wordlist):
+        if word in inv_UNITS_ORDINAL_WORDS:
+            wordlist[i] = inv_UNITS_ORDINAL_WORDS[word]
+            txt = txt.replace(word, wordlist[i])
+        elif word.startswith(u'ال') and word[2:] in inv_UNITS_ORDINAL_WORDS:
+            wordlist[i] = inv_UNITS_ORDINAL_WORDS[word[2:]]
+            txt = txt.replace(word, wordlist[i])
+    return txt, wordlist
+
 def is_complication(word):
     is_comp = 0
     if u'مية' in word or u'مائة' in word or u'مئة' in word or u'ميتين' in word or u'مئتين' in word or u'مائتين' in word:
@@ -14,18 +30,17 @@ def is_complication(word):
     if u'مليون' in word or u'ملايين' in word:
         is_comp = 1
     return is_comp
-    
 
-def extract_date(text, wordlist):
-    month_word_in_txt = 0
-    if any(word in text for word in MONTH_WORDS):
-        month_word_in_txt = 1
+def get_separate_numbers(wordlist):
     num_phrases_pos = detect_number_phrases_position(wordlist)
-    print(num_phrases_pos)
-
-
     separate_numbers = []
+    new_wordlist = []
+    j=0
     for slice in num_phrases_pos:
+        while j<slice[0]:
+            new_wordlist.append(wordlist[j])
+            j+=1
+        j = slice[1] + 1
         temp_word = ""
         for i in range(slice[0], slice[1]+1):
             if len(temp_word) == 0: temp_word += wordlist[i]
@@ -38,10 +53,20 @@ def extract_date(text, wordlist):
                     temp_word += (" " + wordlist[i])
                 else:
                     separate_numbers.append(temp_word)
+                    new_wordlist.append(temp_word)
                     temp_word = wordlist[i]
         separate_numbers.append(temp_word)
+        new_wordlist.append(temp_word)
+    while j<len(wordlist):
+        new_wordlist.append(wordlist[j])
+        j+=1
+    return separate_numbers, new_wordlist
     
-    print(separate_numbers)
+def extract_date(text, wordlist):
+    month_word_in_txt = 0
+    if any(word in text for word in MONTH_WORDS):
+        month_word_in_txt = 1
+    separate_numbers, _ = get_separate_numbers(wordlist)
     num_phrases = separate_numbers
     month = -1
     day = -1
@@ -86,20 +111,8 @@ def extract_date(text, wordlist):
     return day, month, year
 
 if __name__ == '__main__':
-    txt = "رفعت الجلسة يوم سبعتاشر من فبراير عشرين اتنين وعشرين"
+    txt = "رفعت الجلسة يوم سبعتاشر من فبراير عشرين اتنين وعشرين بعد"
     # txt = "17"
-    for word in YEARS_REPLACE:
-        if txt.find(word) != -1:
-            txt = txt.replace(word, YEARS_REPLACE[word])
-    txt = txt.replace(u'و ', u'و')
-    wordlist = araby.tokenize(txt)
-    inv_UNITS_ORDINAL_WORDS = {v: k for k, v in UNITS_ORDINAL_WORDS.items()}
-    for i, word in enumerate(wordlist):
-        if word in inv_UNITS_ORDINAL_WORDS:
-            wordlist[i] = inv_UNITS_ORDINAL_WORDS[word]
-            txt = txt.replace(word, wordlist[i])
-        elif word.startswith(u'ال') and word[2:] in inv_UNITS_ORDINAL_WORDS:
-            wordlist[i] = inv_UNITS_ORDINAL_WORDS[word[2:]]
-            txt = txt.replace(word, wordlist[i])
+    txt, wordlist = prepare_txt(txt)
     day, month, year = extract_date(txt, wordlist)
     print(day, month, year)
