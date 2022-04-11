@@ -585,10 +585,9 @@ def detect_number_phrases_position(wordlist):
             key = word_nm[1:]
         elif word_nm != u'واحد' and word_nm.startswith(u'و'):
             key = word_nm[1:]
-            # print("KEY : ", key)
-        if word_nm and key[0:2] in (u'ال') and not (key[2] == u'ف' or key.startswith(u'الاف')) :
-            key = key[2:]
-            # print("KEY : ", key)
+        if len(key)>=2:
+            if word_nm and key[0:2] in (u'ال') and not (key.startswith(u'الف') or key.startswith(u'الاف')) :
+                key = key[2:]
         if key in nbconst.NUMBER_WORDS or key.isnumeric():
             if key not in (u'أحد', u'إحدى', u'اثنا', u'اثني', u'اثنتي', \
                            u'اثنتا') or nextword in (u'عشر', u'عشرة'):
