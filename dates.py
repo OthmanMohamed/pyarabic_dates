@@ -1,8 +1,8 @@
-from pyarabic.number import extract_number_phrases
-from pyarabic.number import detect_number_phrases_position
-from pyarabic.number import text2number
-from pyarabic.number_const import UNITS_ORDINAL_WORDS, COMPLICATIONS
-from pyarabic import araby
+from number import extract_number_phrases
+from number import detect_number_phrases_position
+from number import text2number
+from number_const import UNITS_ORDINAL_WORDS, COMPLICATIONS
+import araby
 from dates_const import ACCEPT_NUMBER_PREFIX, MONTH_WORDS, YEARS_REPLACE
 
 def prepare_txt(txt):

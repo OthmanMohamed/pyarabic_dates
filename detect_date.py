@@ -1,6 +1,6 @@
 from dates import prepare_txt, get_separate_numbers, extract_date
-from pyarabic.number import detect_number_phrases_position, text2number
-from pyarabic import araby
+from number import detect_number_phrases_position, text2number
+import araby
 from dates_const import DATE_FILL_WORDS, MONTH_WORDS, DAY_DEFINING_WORDS
 import os
 
@@ -88,17 +88,17 @@ def process_dates(txt):
     return txt, date_flag, year_flag
 
 def main():
-    # txt = "هذا وقد ورد إلينا تقرير المعمل الجنائي الخاص بالحرز ألف خمسميه و تسعين تلاته إتنين و المثبت به الحرز ألف تسعميه"
-    # new_txt, date_flag, year_flag = process_dates(txt)
-    # if date_flag: print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
-    directory = "/data/mahkama"
-    for filename in os.listdir(directory):
-        f = os.path.join(directory, filename)
-        if f.endswith(".txt"):
-            f_o = open(f, 'r')
-            txt = f_o.read()
-            new_txt, date_flag, year_flag = process_dates(txt)
-            if date_flag and not year_flag: print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
+    txt = "ليوم خمسة وعشرين اربعة هذا وقد ورد إلينا تقرير المعمل الجنائي الخاص بالحرز ألف خمسميه و تسعين تلاته إتنين و المثبت به الحرز ألف تسعميه"
+    new_txt, date_flag, year_flag = process_dates(txt)
+    if date_flag: print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
+    # directory = "/data/mahkama"
+    # for filename in os.listdir(directory):
+    #     f = os.path.join(directory, filename)
+    #     if f.endswith(".txt"):
+    #         f_o = open(f, 'r')
+    #         txt = f_o.read()
+    #         new_txt, date_flag, year_flag = process_dates(txt)
+    #         if date_flag and not year_flag: print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
 
 
 if __name__ == '__main__':
