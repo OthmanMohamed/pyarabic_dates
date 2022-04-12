@@ -67,14 +67,12 @@ def process_dates(txt):
     date_sentences = get_dates(new_wordlist, number_flag_list)
     if date_sentences == ['']: date_sentences = []
     date_flag = 0
-    year_flag = 0
     for d in date_sentences:
         if d == '': continue
         new_d, d_wordlist = prepare_txt(d)
         day, month, year = extract_date(new_d, d_wordlist)
         if day == -1 or month == -1: continue
         if year != -1:
-            year_flag = 1
             date_flag = 1
             txt = txt.replace(d, str(year) + "/" + str(month) + "/" + str(day))
         else:
@@ -85,11 +83,11 @@ def process_dates(txt):
             # if 1:
                 txt = txt.replace(d, str(month) + "/" + str(day))
                 date_flag = 1
-    return txt, date_flag, year_flag
+    return txt, date_flag
 
 def main():
     txt = "ليوم خمسة وعشرين اربعة هذا وقد ورد إلينا تقرير المعمل الجنائي الخاص بالحرز ألف خمسميه و تسعين تلاته إتنين و المثبت به الحرز ألف تسعميه"
-    new_txt, date_flag, year_flag = process_dates(txt)
+    new_txt, date_flag = process_dates(txt)
     if date_flag: print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
     # directory = "/data/mahkama"
     # for filename in os.listdir(directory):
