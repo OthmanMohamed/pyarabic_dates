@@ -1,6 +1,7 @@
 from dates import prepare_txt, get_separate_numbers, extract_date
 from pyarabic.number import detect_number_phrases_position, text2number
-from dates_const import DATE_FILL_WORDS, MONTH_WORDS
+from pyarabic import araby
+from dates_const import DATE_FILL_WORDS, MONTH_WORDS, DAY_DEFINING_WORDS
 import os
 
 
@@ -22,15 +23,20 @@ def get_dates(new_wordlist, number_flag_list):
         # print(new_wordlist[i])
         if state == "START":
             date_sent = ""
-            if number_flag_list[i]==1 and text2number(new_wordlist[i]) <= 31:
-                date_sent += new_wordlist[i]
-                state = "DAY"
+            if number_flag_list[i]==1:
+                if text2number(new_wordlist[i]) <= 31 and text2number(new_wordlist[i]) > 0:
+                    date_sent += new_wordlist[i]
+                    state = "DAY"
+                else:
+                    state = "REPEATED NUMS"
         elif state == "DAY":
             if number_flag_list[i]==0 and not (new_wordlist[i] in DATE_FILL_WORDS or new_wordlist[i] in MONTH_WORDS):
                 state = "START"
+            elif number_flag_list[i]==1 and (text2number(new_wordlist[i]) < 0 or text2number(new_wordlist[i]) > 12):
+                state = "REPEATED NUMS"
             else:
                 date_sent += " " + new_wordlist[i]
-                if (number_flag_list[i]==1 and text2number(new_wordlist[i]) > 0 and text2number(new_wordlist[i]) <= 12) or new_wordlist[i] in MONTH_WORDS:
+                if number_flag_list[i]==1 or new_wordlist[i] in MONTH_WORDS:
                     state = "MONTH"
         elif state == "MONTH":
             if number_flag_list[i]==0 and not new_wordlist[i] in DATE_FILL_WORDS:
@@ -61,20 +67,29 @@ def process_dates(txt):
     date_sentences = get_dates(new_wordlist, number_flag_list)
     if date_sentences == ['']: date_sentences = []
     date_flag = 0
-    if date_sentences: date_flag = 1
+    year_flag = 0
     for d in date_sentences:
         if d == '': continue
-        d, d_wordlist = prepare_txt(d)
-        day, month, year = extract_date(d, d_wordlist)
+        new_d, d_wordlist = prepare_txt(d)
+        day, month, year = extract_date(new_d, d_wordlist)
+        if day == -1 or month == -1: continue
         if year != -1:
-            txt = txt.replace(d, str(day) + "/" + str(month) + "/" + str(year))
+            year_flag = 1
+            date_flag = 1
+            txt = txt.replace(d, str(year) + "/" + str(month) + "/" + str(day))
         else:
-            txt = txt.replace(d, str(day) + "/" + str(month))
-    return txt, date_flag
+            index = txt.find(d)
+            if index == 0: continue
+            tokenized = araby.tokenize(txt[:index])
+            if tokenized[-1] in DAY_DEFINING_WORDS:
+            # if 1:
+                txt = txt.replace(d, str(month) + "/" + str(day))
+                date_flag = 1
+    return txt, date_flag, year_flag
 
 def main():
-    # txt = "خمستاشر خمسه ألفين وخمستاشر محضر تحقيق إنه في يوم الأربعاء الموافق الثامن عشر من شهر نوفمبر لعام ألفين وعشرين من الميلاد"
-    # new_txt, date_flag = process_dates(txt)
+    # txt = "هذا وقد ورد إلينا تقرير المعمل الجنائي الخاص بالحرز ألف خمسميه و تسعين تلاته إتنين و المثبت به الحرز ألف تسعميه"
+    # new_txt, date_flag, year_flag = process_dates(txt)
     # if date_flag: print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
     directory = "/data/mahkama"
     for filename in os.listdir(directory):
@@ -82,8 +97,8 @@ def main():
         if f.endswith(".txt"):
             f_o = open(f, 'r')
             txt = f_o.read()
-            new_txt, date_flag = process_dates(txt)
-            if date_flag: print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
+            new_txt, date_flag, year_flag = process_dates(txt)
+            if date_flag and not year_flag: print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
 
 
 if __name__ == '__main__':
