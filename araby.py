@@ -35,9 +35,9 @@ except NameError:
 if __name__ == "__main__":
     import stack
 else:
-    from . import stack
+    import stack
     
-import pyarabic.stack
+import stack
 
 # ~ import pyarabic.araby_const
 COMMA = u'\u060C'
