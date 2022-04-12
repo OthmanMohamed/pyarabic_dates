@@ -25,17 +25,16 @@ from __future__ import (
 import math
 import sys
 from six import text_type as unicode
-try:
-    import araby
-    import number_const as nbconst
-    import named_const as nmconst
-    import arabrepr
+import araby
+import number_const as nbconst
+import named_const as nmconst
+import arabrepr
 
-except ImportError:
-    from pyarabic import araby
-    from pyarabic import number_const as nbconst
-    from pyarabic import named_const as nmconst
-    from pyarabic import arabrepr
+# except ImportError:
+#     from pyarabic import araby
+#     from pyarabic import number_const as nbconst
+#     from pyarabic import named_const as nmconst
+#     from pyarabic import arabrepr
 
 
 class ArNumbers(object):
