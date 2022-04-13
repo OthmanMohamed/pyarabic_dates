@@ -4,8 +4,11 @@ from number import text2number
 from number_const import UNITS_ORDINAL_WORDS, COMPLICATIONS
 import araby
 from dates_const import ACCEPT_NUMBER_PREFIX, MONTH_WORDS, YEARS_REPLACE
+import re
 
 def prepare_txt(txt):
+    rex = re.compile(r' +')
+    txt = rex.sub(' ', txt)
     for word in YEARS_REPLACE:
         if txt.find(word) != -1 and txt.find("وعشرين") == -1:
             txt = txt.replace(word, YEARS_REPLACE[word])

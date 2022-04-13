@@ -19,8 +19,9 @@ def get_dates(new_wordlist, number_flag_list):
     date_sentences = []
     date_sent = ""
     for i in range(len(new_wordlist)):
+        # print(i)
         # print(state)
-        # print(new_wordlist[i])
+        # print(new_wordlist[i], '\n\n\n\n')
         if state == "START":
             date_sent = ""
             if number_flag_list[i]==1:
@@ -45,7 +46,7 @@ def get_dates(new_wordlist, number_flag_list):
             else:
                 date_sent += " " + new_wordlist[i]
                 if number_flag_list[i]==1:
-                    if text2number(new_wordlist[i]) > 1000:
+                    if text2number(new_wordlist[i]) > 1900:
                         date_sentences.append(date_sent)
                         state = "START"
                     else:
@@ -55,7 +56,8 @@ def get_dates(new_wordlist, number_flag_list):
             if number_flag_list[i]==0: state = "START"
 
     else:
-        date_sentences.append(date_sent)
+        if state == "MONTH" or state == "YEAR":
+            date_sentences.append(date_sent)
     return date_sentences
         
 
@@ -67,6 +69,7 @@ def process_dates(txt):
     date_sentences = get_dates(new_wordlist, number_flag_list)
     if date_sentences == ['']: date_sentences = []
     date_flag = 0
+    year_flag = 0
     for d in date_sentences:
         if d == '': continue
         new_d, d_wordlist = prepare_txt(d)
@@ -74,6 +77,7 @@ def process_dates(txt):
         if day == -1 or month == -1: continue
         if year != -1:
             date_flag = 1
+            year_flag = 1
             txt = txt.replace(d, str(year) + "/" + str(month) + "/" + str(day))
         else:
             index = txt.find(d)
@@ -83,20 +87,20 @@ def process_dates(txt):
             # if 1:
                 txt = txt.replace(d, str(month) + "/" + str(day))
                 date_flag = 1
-    return txt, date_flag
+    return txt, date_flag, year_flag
 
 def main():
-    txt = "ليوم خمسة وعشرين اربعة هذا وقد ورد إلينا تقرير المعمل الجنائي الخاص بالحرز ألف خمسميه و تسعين تلاته إتنين و المثبت به الحرز ألف تسعميه"
-    new_txt, date_flag = process_dates(txt)
-    if date_flag: print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
-    # directory = "/data/mahkama"
-    # for filename in os.listdir(directory):
-    #     f = os.path.join(directory, filename)
-    #     if f.endswith(".txt"):
-    #         f_o = open(f, 'r')
-    #         txt = f_o.read()
-    #         new_txt, date_flag, year_flag = process_dates(txt)
-    #         if date_flag and not year_flag: print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
+    # txt = "تلاته تسعة ألفين  واحد وعشرين  الساعة التاسعة  ونصف مساءا س و متى قمت بالتحرك من مكان ضبط المتهمين"
+    # new_txt, date_flag, year_flag = process_dates(txt)
+    # if date_flag: print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
+    directory = "/data/mahkama"
+    for filename in os.listdir(directory):
+        f = os.path.join(directory, filename)
+        if f.endswith(".txt"):
+            f_o = open(f, 'r')
+            txt = f_o.read()
+            new_txt, date_flag, year_flag = process_dates(txt)
+            if date_flag : print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
 
 
 if __name__ == '__main__':
