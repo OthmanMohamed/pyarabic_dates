@@ -90,17 +90,18 @@ def process_dates(txt):
     return txt, date_flag, year_flag
 
 def main():
-    # txt = "تلاته تسعة ألفين  واحد وعشرين  الساعة التاسعة  ونصف مساءا س و متى قمت بالتحرك من مكان ضبط المتهمين"
-    # new_txt, date_flag, year_flag = process_dates(txt)
-    # if date_flag: print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
-    directory = "/data/mahkama"
-    for filename in os.listdir(directory):
-        f = os.path.join(directory, filename)
-        if f.endswith(".txt"):
-            f_o = open(f, 'r')
-            txt = f_o.read()
-            new_txt, date_flag, year_flag = process_dates(txt)
-            if date_flag : print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
+    txt = "  حوالي تلات تيام تاريخ تلاتاشر يونيو عشرين واحد وعشرين"
+    new_txt, date_flag, year_flag = process_dates(txt)
+    print(new_txt)
+    if date_flag: print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
+    # directory = "/data/mahkama"
+    # for filename in os.listdir(directory):
+    #     f = os.path.join(directory, filename)
+    #     if f.endswith(".txt"):
+    #         f_o = open(f, 'r')
+    #         txt = f_o.read()
+    #         new_txt, date_flag, year_flag = process_dates(txt)
+    #         if date_flag : print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
 
 
 if __name__ == '__main__':

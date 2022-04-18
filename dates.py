@@ -10,7 +10,7 @@ def prepare_txt(txt):
     rex = re.compile(r' +')
     txt = rex.sub(' ', txt)
     for word in YEARS_REPLACE:
-        if txt.find(word) != -1 and txt.find("وعشرين") == -1:
+        if txt.find(word) != -1:
             txt = txt.replace(word, YEARS_REPLACE[word])
     txt = txt.replace(u' و ', u' و')
     wordlist = araby.tokenize(txt)
