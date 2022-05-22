@@ -89,3 +89,8 @@ DAY_DEFINING_WORDS = [
     "جمعه",
     "مؤرخ في"
 ]
+
+TIME_TRIGGERS = [
+    "الساعة",
+    "تمام"
+]

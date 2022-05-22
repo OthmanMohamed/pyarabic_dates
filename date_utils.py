@@ -4,25 +4,35 @@ from number import text2number
 from number_const import UNITS_ORDINAL_WORDS, COMPLICATIONS
 import araby
 from dates_const import ACCEPT_NUMBER_PREFIX, MONTH_WORDS, YEARS_REPLACE
+from dates_const import DATE_FILL_WORDS, DAY_DEFINING_WORDS
 import re
 
+
 def prepare_txt(txt):
-    rex = re.compile(r' +')
-    txt = rex.sub(' ', txt)
+    # REPLACE MULTI SPACES
+    repeared_spaces = re.compile(r' +')
+    txt = repeared_spaces.sub(' ', txt)
+    # REPLACE COMMON YEAR NAMES "مثال: عشرين عشرين ---> الفين وعشرين"
     for word in YEARS_REPLACE:
         if txt.find(word) != -1:
             txt = txt.replace(word, YEARS_REPLACE[word])
+    # REPLACE و WITH SPACES
     txt = txt.replace(u' و ', u' و')
+    # TOKENIZE
     wordlist = araby.tokenize(txt)
+    # REPLACE ORDINALS WITH NUMBER WORDS
     inv_UNITS_ORDINAL_WORDS = {v: k for k, v in UNITS_ORDINAL_WORDS.items()}
     for i, word in enumerate(wordlist):
         if word in inv_UNITS_ORDINAL_WORDS:
+            # REPLACE ORDINALS EVEN WITHOUT ال ; MAY NEED TO BE REMOVED 
             wordlist[i] = inv_UNITS_ORDINAL_WORDS[word]
             txt = txt.replace(word, wordlist[i])
         elif word.startswith(u'ال') and word[2:] in inv_UNITS_ORDINAL_WORDS:
+            # REPLACE ORDINALS CONTAINING ال
             wordlist[i] = inv_UNITS_ORDINAL_WORDS[word[2:]]
             txt = txt.replace(word, wordlist[i])
     return txt, wordlist
+
 
 def is_complication(word):
     is_comp = 0
@@ -33,6 +43,7 @@ def is_complication(word):
     if u'مليون' in word or u'ملايين' in word:
         is_comp = 1
     return is_comp
+
 
 def get_separate_numbers(wordlist):
     num_phrases_pos = detect_number_phrases_position(wordlist)
@@ -63,14 +74,71 @@ def get_separate_numbers(wordlist):
     while j<len(wordlist):
         new_wordlist.append(wordlist[j])
         j+=1
-    return separate_numbers, new_wordlist
+    flags_list = []
+    for w in new_wordlist:
+        if " " in w or detect_number_phrases_position([w]):
+            flags_list.append(1)
+        else:
+            flags_list.append(0)
+    return separate_numbers, new_wordlist, flags_list
+
+
+def get_dates(new_wordlist, number_flag_list):
+    state = "START"
+    date_sentences = []
+    date_sent = ""
+    for i in range(len(new_wordlist)):
+        # print(i)
+        # print(state)
+        # print(new_wordlist[i], '\n\n\n\n')
+        if state == "START":
+            date_sent = ""
+            if number_flag_list[i]==1:
+                if text2number(new_wordlist[i]) <= 31 and text2number(new_wordlist[i]) > 0:
+                    date_sent += new_wordlist[i]
+                    state = "DAY"
+                else:
+                    state = "REPEATED NUMS"
+        elif state == "DAY":
+            if number_flag_list[i]==0 and not (new_wordlist[i] in DATE_FILL_WORDS or new_wordlist[i] in MONTH_WORDS):
+                state = "START"
+            elif number_flag_list[i]==1 and (text2number(new_wordlist[i]) < 0 or text2number(new_wordlist[i]) > 12):
+                state = "REPEATED NUMS"
+            else:
+                date_sent += " " + new_wordlist[i]
+                if number_flag_list[i]==1 or new_wordlist[i] in MONTH_WORDS:
+                    state = "MONTH"
+        elif state == "MONTH":
+            if number_flag_list[i]==0 and not new_wordlist[i] in DATE_FILL_WORDS:
+                date_sentences.append(date_sent)
+                state = "START"
+            else:
+                date_sent += " " + new_wordlist[i]
+                if number_flag_list[i]==1:
+                    if text2number(new_wordlist[i]) > 1900:
+                        date_sentences.append(date_sent)
+                        state = "START"
+                    else:
+                        state = "REPEATED NUMS"
+        elif state == "REPEATED NUMS":
+            date_sent = ""
+            if number_flag_list[i]==0: state = "START"
+
+    else:
+        if state == "MONTH" or state == "YEAR":
+            date_sentences.append(date_sent)
+    return date_sentences
+
     
 def extract_date(text, wordlist):
+    print("TXT : ", text)
+    print("WORDLIST : ", wordlist)
     month_word_in_txt = 0
     if any(word in text for word in MONTH_WORDS):
         month_word_in_txt = 1
-    separate_numbers, _ = get_separate_numbers(wordlist)
+    separate_numbers, *_ = get_separate_numbers(wordlist)
     num_phrases = separate_numbers
+    print("NUM PHRASES : ", num_phrases)
     month = -1
     day = -1
     year = -1
@@ -78,7 +146,7 @@ def extract_date(text, wordlist):
         for word in wordlist:
             if word in MONTH_WORDS:
                 num_phrases.append(word)
-
+    print("NUM PHRASES AFTER : ", num_phrases)
     if month_word_in_txt:
         for n in num_phrases:
             nn = text2number(n)
@@ -109,8 +177,8 @@ def extract_date(text, wordlist):
                 month = nn
             else:
                 year = nn
-
     return day, month, year
+
 
 if __name__ == '__main__':
     txt = "رفعت الجلسة يوم سبعتاشر من فبراير عشرين اتنين وعشرين بعد"

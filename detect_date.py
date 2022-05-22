@@ -1,71 +1,12 @@
-from dates import prepare_txt, get_separate_numbers, extract_date
+from date_utils import prepare_txt, get_separate_numbers, extract_date, get_dates
 from number import detect_number_phrases_position, text2number
 import araby
 from dates_const import DATE_FILL_WORDS, MONTH_WORDS, DAY_DEFINING_WORDS
-import os
-
-
-def number_flags(new_wordlist):
-    flags_list = []
-    for w in new_wordlist:
-        if " " in w or detect_number_phrases_position([w]):
-            flags_list.append(1)
-        else:
-            flags_list.append(0)
-    return flags_list
-
-def get_dates(new_wordlist, number_flag_list):
-    state = "START"
-    date_sentences = []
-    date_sent = ""
-    for i in range(len(new_wordlist)):
-        # print(i)
-        # print(state)
-        # print(new_wordlist[i], '\n\n\n\n')
-        if state == "START":
-            date_sent = ""
-            if number_flag_list[i]==1:
-                if text2number(new_wordlist[i]) <= 31 and text2number(new_wordlist[i]) > 0:
-                    date_sent += new_wordlist[i]
-                    state = "DAY"
-                else:
-                    state = "REPEATED NUMS"
-        elif state == "DAY":
-            if number_flag_list[i]==0 and not (new_wordlist[i] in DATE_FILL_WORDS or new_wordlist[i] in MONTH_WORDS):
-                state = "START"
-            elif number_flag_list[i]==1 and (text2number(new_wordlist[i]) < 0 or text2number(new_wordlist[i]) > 12):
-                state = "REPEATED NUMS"
-            else:
-                date_sent += " " + new_wordlist[i]
-                if number_flag_list[i]==1 or new_wordlist[i] in MONTH_WORDS:
-                    state = "MONTH"
-        elif state == "MONTH":
-            if number_flag_list[i]==0 and not new_wordlist[i] in DATE_FILL_WORDS:
-                date_sentences.append(date_sent)
-                state = "START"
-            else:
-                date_sent += " " + new_wordlist[i]
-                if number_flag_list[i]==1:
-                    if text2number(new_wordlist[i]) > 1900:
-                        date_sentences.append(date_sent)
-                        state = "START"
-                    else:
-                        state = "REPEATED NUMS"
-        elif state == "REPEATED NUMS":
-            date_sent = ""
-            if number_flag_list[i]==0: state = "START"
-
-    else:
-        if state == "MONTH" or state == "YEAR":
-            date_sentences.append(date_sent)
-    return date_sentences
-        
+import os   
 
 def process_dates(txt):
     txt, wordlist = prepare_txt(txt)
-    separate_numbers, new_wordlist = get_separate_numbers(wordlist)
-    # print(separate_numbers)
-    number_flag_list = number_flags(new_wordlist)
+    separate_numbers, new_wordlist, number_flag_list = get_separate_numbers(wordlist)
     date_sentences = get_dates(new_wordlist, number_flag_list)
     if date_sentences == ['']: date_sentences = []
     date_flag = 0
@@ -90,9 +31,8 @@ def process_dates(txt):
     return txt, date_flag, year_flag
 
 def main():
-    txt = "  حوالي تلات تيام تاريخ تلاتاشر يونيو عشرين واحد وعشرين"
+    txt = "  قبل اتنين تسعة الفين وعشرة وحوالي تلات تيام تاريخ العاشر من يونيو عشرين واحد وعشرين الساعة العاشرة وخمس دقائق"
     new_txt, date_flag, year_flag = process_dates(txt)
-    print(new_txt)
     if date_flag: print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
     # directory = "/data/mahkama"
     # for filename in os.listdir(directory):
