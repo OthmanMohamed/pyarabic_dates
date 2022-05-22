@@ -47,7 +47,7 @@ def process_dates(txt):
     return txt, date_flag, year_flag, time_flag
 
 def main():
-    txt = "  قبل اتنين وعشرين تسعة الفين وعشرة وحوالي تلات تيام تاريخ العاشر من يونيو عشرين واحد و عشرين الساعة العاشرة وخمس دقائق"
+    txt = "  قبل اتنين وعشرين تسعة الفين وعشرة الساعة تمانية ونص مساء وحوالي تلات تيام تاريخ العاشر من يونيو عشرين واحد و عشرين الساعة العاشرة وخمس دقائق"
     new_txt, date_flag, year_flag, time_flag = process_dates(txt)
     if date_flag: print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
     # directory = "/data/mahkama"

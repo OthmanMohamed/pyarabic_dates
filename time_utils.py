@@ -1,8 +1,15 @@
 from dates_const import TIME_TRIGGERS, TIME_TERMINATING
+from number_const import TIME_FRACTIONS
 from number import text2number
 from date_utils import get_separate_numbers
 
 def extract_time(text, wordlist):
+    for i, w in enumerate(wordlist):
+        if w in TIME_FRACTIONS.keys():
+            wordlist[i] = TIME_FRACTIONS[w]
+        elif (w.startswith('و') and w[1:] in TIME_FRACTIONS.keys()):
+            wordlist[i] = 'و' + TIME_FRACTIONS[w[1:]]
+    print(wordlist)
     separate_numbers, *_ = get_separate_numbers(wordlist)
     print(separate_numbers)
     num_phrases = separate_numbers
@@ -44,10 +51,13 @@ def get_time(new_wordlist, number_flag_list):
                 if i+1 < len(number_flag_list) and number_flag_list[i+1] == 0:
                     time_sentences.append(time_sent)
                     state = "START"
-                elif i+1 < len(number_flag_list) and number_flag_list[i+1] == 1 and new_wordlist.startswith('و'):
+                elif i+1 < len(number_flag_list) and number_flag_list[i+1] == 1 and new_wordlist[i+1].startswith('و') and text2number(new_wordlist[i+1]) > 0 and text2number(new_wordlist[i+1]) < 60:
                     time_sent += " " + new_wordlist[i]
                     state = "MINUTE"
-            elif number_flag_list[i] == 1:
+                elif i+1 < len(number_flag_list) and new_wordlist[i+1].startswith('و') and new_wordlist[i+1][1:] in TIME_FRACTIONS.keys():
+                    time_sent += " " + new_wordlist[i]
+                    state = "MINUTE"
+            elif (number_flag_list[i] == 1 and text2number(new_wordlist[i]) > 0 and text2number(new_wordlist[i]) < 60) or new_wordlist[i][1:] in TIME_FRACTIONS.keys():
                 time_sent += " " + new_wordlist[i]
                 state = "MINUTE"
             elif i+1 < len(number_flag_list) and number_flag_list[i+1] == 0:
@@ -58,7 +68,7 @@ def get_time(new_wordlist, number_flag_list):
                 time_sent += " " + new_wordlist[i]
                 time_sentences.append(time_sent)
                 state = "START"
-            elif number_flag_list[i] == 0:
+            elif number_flag_list[i] == 0 and not number_flag_list[i][1:] in TIME_FRACTIONS.keys():
                 time_sentences.append(time_sent)
                 state = "START"
     else:
