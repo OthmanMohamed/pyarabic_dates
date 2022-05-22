@@ -1,8 +1,8 @@
 from number import extract_number_phrases
 from number import detect_number_phrases_position
 from number import text2number
-from number_const import UNITS_ORDINAL_WORDS, COMPLICATIONS
 import araby
+from number_const import UNITS_ORDINAL_WORDS, UNITS_ORDINAL_WORDS_FEMININ, COMPLICATIONS
 from dates_const import ACCEPT_NUMBER_PREFIX, MONTH_WORDS, YEARS_REPLACE
 from dates_const import DATE_FILL_WORDS, DAY_DEFINING_WORDS
 import re
@@ -12,25 +12,32 @@ def prepare_txt(txt):
     # REPLACE MULTI SPACES
     repeared_spaces = re.compile(r' +')
     txt = repeared_spaces.sub(' ', txt)
+    # REPLACE و WITH SPACES
+    txt = txt.replace(u' و ', u' و')
     # REPLACE COMMON YEAR NAMES "مثال: عشرين عشرين ---> الفين وعشرين"
     for word in YEARS_REPLACE:
         if txt.find(word) != -1:
             txt = txt.replace(word, YEARS_REPLACE[word])
-    # REPLACE و WITH SPACES
-    txt = txt.replace(u' و ', u' و')
     # TOKENIZE
     wordlist = araby.tokenize(txt)
     # REPLACE ORDINALS WITH NUMBER WORDS
     inv_UNITS_ORDINAL_WORDS = {v: k for k, v in UNITS_ORDINAL_WORDS.items()}
+    inv_UNITS_ORDINAL_WORDS_FEMININ = {v: k for k, v in UNITS_ORDINAL_WORDS_FEMININ.items()}
+    txt = ""
     for i, word in enumerate(wordlist):
         if word in inv_UNITS_ORDINAL_WORDS:
             # REPLACE ORDINALS EVEN WITHOUT ال ; MAY NEED TO BE REMOVED 
             wordlist[i] = inv_UNITS_ORDINAL_WORDS[word]
-            txt = txt.replace(word, wordlist[i])
         elif word.startswith(u'ال') and word[2:] in inv_UNITS_ORDINAL_WORDS:
             # REPLACE ORDINALS CONTAINING ال
             wordlist[i] = inv_UNITS_ORDINAL_WORDS[word[2:]]
-            txt = txt.replace(word, wordlist[i])
+        elif word in inv_UNITS_ORDINAL_WORDS_FEMININ:
+            # REPLACE ORDINALS EVEN WITHOUT ال ; MAY NEED TO BE REMOVED 
+            wordlist[i] = inv_UNITS_ORDINAL_WORDS_FEMININ[word]
+        elif word.startswith(u'ال') and word[2:] in inv_UNITS_ORDINAL_WORDS_FEMININ:
+            # REPLACE ORDINALS CONTAINING ال
+            wordlist[i] = inv_UNITS_ORDINAL_WORDS_FEMININ[word[2:]]
+        txt = txt + " " + wordlist[i]
     return txt, wordlist
 
 
@@ -59,7 +66,7 @@ def get_separate_numbers(wordlist):
         for i in range(slice[0], slice[1]+1):
             if len(temp_word) == 0: temp_word += wordlist[i]
             else:
-                if wordlist[i].startswith(u'و') and wordlist[i]!= u'واحد':
+                if wordlist[i].startswith(u'و') and wordlist[i]!= u'واحد' and text2number(wordlist[i]) >= 20:
                     temp_word += " " + wordlist[i]
                 elif is_complication(wordlist[i-1]):
                     temp_word += (" " + wordlist[i])
@@ -131,14 +138,14 @@ def get_dates(new_wordlist, number_flag_list):
 
     
 def extract_date(text, wordlist):
-    print("TXT : ", text)
-    print("WORDLIST : ", wordlist)
+    # print("TXT : ", text)
+    # print("WORDLIST : ", wordlist)
     month_word_in_txt = 0
     if any(word in text for word in MONTH_WORDS):
         month_word_in_txt = 1
     separate_numbers, *_ = get_separate_numbers(wordlist)
     num_phrases = separate_numbers
-    print("NUM PHRASES : ", num_phrases)
+    # print("NUM PHRASES : ", num_phrases)
     month = -1
     day = -1
     year = -1
@@ -146,7 +153,7 @@ def extract_date(text, wordlist):
         for word in wordlist:
             if word in MONTH_WORDS:
                 num_phrases.append(word)
-    print("NUM PHRASES AFTER : ", num_phrases)
+    # print("NUM PHRASES AFTER : ", num_phrases)
     if month_word_in_txt:
         for n in num_phrases:
             nn = text2number(n)

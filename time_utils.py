@@ -1,85 +1,67 @@
-from dates_const import TIME_TRIGGERS
+from dates_const import TIME_TRIGGERS, TIME_TERMINATING
+from number import text2number
+from date_utils import get_separate_numbers
 
 def extract_time(text, wordlist):
     separate_numbers, *_ = get_separate_numbers(wordlist)
+    print(separate_numbers)
     num_phrases = separate_numbers
     hours = -1
     minutes = -1
-    if month_word_in_txt:
-        for n in num_phrases:
-            nn = text2number(n)
-            if nn == 0:
-                if n in MONTH_WORDS:
-                    nn = MONTH_WORDS[n]
-                    month = nn 
-                else:
-                    nn = n
-                    if day == -1:
-                        day = nn
-                    elif month == -1:
-                        month = nn
-                    else:
-                        year = nn
-            else:
-                if day == -1: 
-                    day = nn
-                else:
-                    year = nn
+    for n in num_phrases:
+        nn = text2number(n)
+        if nn==0: nn = n
+        if hours == -1:
+            hours = nn
+        elif minutes == -1:
+            minutes = nn
     else:
-        for n in num_phrases:
-            nn = text2number(n)
-            if nn==0: nn = n
-            if day == -1:
-                day = nn
-            elif month == -1:
-                month = nn
-            else:
-                year = nn
-    return day, month, year
+        if minutes == -1: minutes = 0
+    return hours, minutes
 
 
-def get_dates(new_wordlist, number_flag_list):
+def get_time(new_wordlist, number_flag_list):
     state = "START"
-    date_sentences = []
-    date_sent = ""
+    time_sentences = []
+    time_sent = ""
     for i in range(len(new_wordlist)):
         # print(i)
         # print(state)
         # print(new_wordlist[i], '\n\n\n\n')
         if state == "START":
-            date_sent = ""
             if new_wordlist[i] in TIME_TRIGGERS:
-                if text2number(new_wordlist[i]) <= 31 and text2number(new_wordlist[i]) > 0:
-                    date_sent += new_wordlist[i]
-                    state = "DAY"
-                else:
-                    state = "REPEATED NUMS"
-        elif state == "DAY":
-            if number_flag_list[i]==0 and not (new_wordlist[i] in DATE_FILL_WORDS or new_wordlist[i] in MONTH_WORDS):
-                state = "START"
-            elif number_flag_list[i]==1 and (text2number(new_wordlist[i]) < 0 or text2number(new_wordlist[i]) > 12):
-                state = "REPEATED NUMS"
+                state = "TIME TRIGGERED"
+        elif state == "TIME TRIGGERED":
+            time_sent = ""
+            if text2number(new_wordlist[i]) <= 24 and text2number(new_wordlist[i]) > 0:
+                time_sent += new_wordlist[i]
+                state = "HOUR"
             else:
-                date_sent += " " + new_wordlist[i]
-                if number_flag_list[i]==1 or new_wordlist[i] in MONTH_WORDS:
-                    state = "MONTH"
-        elif state == "MONTH":
-            if number_flag_list[i]==0 and not new_wordlist[i] in DATE_FILL_WORDS:
-                date_sentences.append(date_sent)
                 state = "START"
-            else:
-                date_sent += " " + new_wordlist[i]
-                if number_flag_list[i]==1:
-                    if text2number(new_wordlist[i]) > 1900:
-                        date_sentences.append(date_sent)
-                        state = "START"
-                    else:
-                        state = "REPEATED NUMS"
-        elif state == "REPEATED NUMS":
-            date_sent = ""
-            if number_flag_list[i]==0: state = "START"
-
+        elif state == "HOUR":
+            if new_wordlist[i] in TIME_TERMINATING:
+                time_sent += " " + new_wordlist[i]
+                if i+1 < len(number_flag_list) and number_flag_list[i+1] == 0:
+                    time_sentences.append(time_sent)
+                    state = "START"
+                elif i+1 < len(number_flag_list) and number_flag_list[i+1] == 1 and new_wordlist.startswith('و'):
+                    time_sent += " " + new_wordlist[i]
+                    state = "MINUTE"
+            elif number_flag_list[i] == 1:
+                time_sent += " " + new_wordlist[i]
+                state = "MINUTE"
+            elif i+1 < len(number_flag_list) and number_flag_list[i+1] == 0:
+                time_sentences.append(time_sent)
+                state = "START"
+        elif state == "MINUTE":
+            if new_wordlist[i] in TIME_TERMINATING:
+                time_sent += " " + new_wordlist[i]
+                time_sentences.append(time_sent)
+                state = "START"
+            elif number_flag_list[i] == 0:
+                time_sentences.append(time_sent)
+                state = "START"
     else:
-        if state == "MONTH" or state == "YEAR":
-            date_sentences.append(date_sent)
-    return date_sentences
+        if state == "HOUR" or state == "MINUTE":
+            time_sentences.append(time_sent)
+    return time_sentences
