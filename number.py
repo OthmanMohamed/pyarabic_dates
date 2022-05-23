@@ -232,9 +232,9 @@ def text2number(text):
     words = text.split(u' ')
     # print words
     for word in words:
-        if word and word != u'واحد' and word[0] in (u'و', u'ف', u'ل', u'ب', u'ك'):
+        if word and not word.startswith(u'واحد') and word[0] in (u'و', u'ف', u'ل', u'ب', u'ك'):
             word = word[1:]
-        if word != u'واحد' and word.startswith(u'و'):
+        if not word.startswith(u'واحد') and word.startswith(u'و'):
             word = word[1:]
         if word.startswith(u'ال') and not (word[2]==u'ف' or word.startswith(u'الاف')):
             word = word[2:]
@@ -579,10 +579,10 @@ def detect_number_phrases_position(wordlist):
         word_nm = araby.strip_tashkeel(word)
         key = word_nm
         # the first word can have prefixes
-        if word_nm and not startnumber and word_nm != u'واحد' \
+        if word_nm and not startnumber and not word_nm.startswith(u'واحد') \
                 and word_nm[0] in (u'و', u'ف', u'ل', u'ب', u'ك'):
             key = word_nm[1:]
-        elif word_nm != u'واحد' and word_nm.startswith(u'و'):
+        elif not word_nm.startswith(u'واحد') and word_nm.startswith(u'و'):
             key = word_nm[1:]
         if len(key)>=2:
             if word_nm and key[0:2] in (u'ال') and not (key.startswith(u'الف') or key.startswith(u'الاف')) :

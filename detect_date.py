@@ -7,13 +7,11 @@ import os
 
 def process_dates(txt):
     txt, wordlist = prepare_txt(txt)
-    print("txt : ", txt)
-    print("wordlist : ", wordlist)
+    # print("wordlist : ", wordlist)
     separate_numbers, new_wordlist, number_flag_list = get_separate_numbers(wordlist)
-    print("new_wordlist : ", new_wordlist)
+    # print("new_wordlist : ", new_wordlist, "\n\n\n")
     date_sentences = get_dates(new_wordlist, number_flag_list)
     time_sentences = get_time(new_wordlist, number_flag_list)
-    print("time_sentences : ", time_sentences)
     if date_sentences == ['']: date_sentences = []
     if time_sentences == ['']: time_sentences = []
     date_flag = 0
@@ -43,13 +41,14 @@ def process_dates(txt):
         if hours == -1 or minutes == -1: continue
         else:
             time_flag = 1
-            txt = txt.replace(t, f'{hours:02d}' + ":" + f'{minutes:02d}')
+            txt = txt.replace(t, f'{int(hours):02d}' + ":" + f'{int(minutes):02d}')
     return txt, date_flag, year_flag, time_flag
 
 def main():
-    txt = "  قبل اتنين وعشرين تسعة الفين وعشرة الساعة تمانية ونص مساء وحوالي تلات تيام تاريخ العاشر من يونيو عشرين واحد و عشرين الساعة العاشرة وخمس دقائق"
+    # txt = "  قبل اتنين وعشرين تسعة الفين وعشرة الساعة تمانية ونص مساء وحوالي تلات تيام تاريخ العاشر من يونيو عشرين واحد و عشرين الساعة العاشرة وخمس دقائق"
+    txt = "تمام الساعة إحدى عشر صباحا"
     new_txt, date_flag, year_flag, time_flag = process_dates(txt)
-    if date_flag: print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
+    if date_flag or time_flag: print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
     # directory = "/data/mahkama"
     # for filename in os.listdir(directory):
     #     f = os.path.join(directory, filename)

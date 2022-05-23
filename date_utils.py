@@ -54,6 +54,7 @@ def is_complication(word):
 
 def get_separate_numbers(wordlist):
     num_phrases_pos = detect_number_phrases_position(wordlist)
+    # print(wordlist, num_phrases_pos)
     separate_numbers = []
     new_wordlist = []
     j=0
@@ -64,10 +65,19 @@ def get_separate_numbers(wordlist):
         j = slice[1] + 1
         temp_word = ""
         for i in range(slice[0], slice[1]+1):
+            # print("wordlist : ", wordlist)
+            # print("wordlist[i] : ", wordlist[i])
+            # print("temp_word : ", temp_word)
+            # print("new_wordlist : ", new_wordlist, "\n\n\n")
             if len(temp_word) == 0: temp_word += wordlist[i]
             else:
-                if wordlist[i].startswith(u'و') and wordlist[i]!= u'واحد' and text2number(wordlist[i]) >= 20:
-                    temp_word += " " + wordlist[i]
+                if wordlist[i].startswith(u'و') and not wordlist[i].startswith(u'واحد') and text2number(wordlist[i]) >= 20:
+                    if i > slice[0]:
+                        if wordlist[i-1] != u'واحدة': temp_word += " " + wordlist[i]
+                        else:
+                            separate_numbers.append(temp_word)
+                            new_wordlist.append(temp_word)
+                            temp_word = wordlist[i]
                 elif is_complication(wordlist[i-1]):
                     temp_word += (" " + wordlist[i])
                 elif wordlist[i] in ACCEPT_NUMBER_PREFIX and text2number(wordlist[i]) > text2number(wordlist[i-1]):

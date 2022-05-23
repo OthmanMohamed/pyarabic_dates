@@ -4,17 +4,19 @@ from number import text2number
 from date_utils import get_separate_numbers
 
 def extract_time(text, wordlist):
-    for i, w in enumerate(wordlist):
-        if w in TIME_FRACTIONS.keys():
-            wordlist[i] = TIME_FRACTIONS[w]
-        elif (w.startswith('و') and w[1:] in TIME_FRACTIONS.keys()):
-            wordlist[i] = 'و' + TIME_FRACTIONS[w[1:]]
-    print(wordlist)
-    separate_numbers, *_ = get_separate_numbers(wordlist)
-    print(separate_numbers)
-    num_phrases = separate_numbers
     hours = -1
     minutes = -1
+    fraction_in_txt = 0
+    if any(word in text for word in TIME_FRACTIONS):
+        fraction_in_txt = 1
+    if fraction_in_txt:
+        for i, w in enumerate(wordlist):
+            if w in TIME_FRACTIONS.keys():
+                minutes = text2number(TIME_FRACTIONS[w])
+            elif (w.startswith('و') and w[1:] in TIME_FRACTIONS.keys()):
+                minutes = text2number(TIME_FRACTIONS[w[1:]])
+    separate_numbers, *_ = get_separate_numbers(wordlist)
+    num_phrases = separate_numbers
     for n in num_phrases:
         nn = text2number(n)
         if nn==0: nn = n
@@ -22,6 +24,8 @@ def extract_time(text, wordlist):
             hours = nn
         elif minutes == -1:
             minutes = nn
+        else:
+            minutes = int(minutes) + int(nn)
     else:
         if minutes == -1: minutes = 0
     return hours, minutes
@@ -34,10 +38,11 @@ def get_time(new_wordlist, number_flag_list):
     for i in range(len(new_wordlist)):
         # print(i)
         # print(state)
+        # print(text2number(new_wordlist[i]))
+        # print(text2number(new_wordlist[i]) <= 24 and text2number(new_wordlist[i]) > 0)
         # print(new_wordlist[i], '\n\n\n\n')
-        if state == "START":
-            if new_wordlist[i] in TIME_TRIGGERS:
-                state = "TIME TRIGGERED"
+        if new_wordlist[i] in TIME_TRIGGERS:
+            state = "TIME TRIGGERED"
         elif state == "TIME TRIGGERED":
             time_sent = ""
             if text2number(new_wordlist[i]) <= 24 and text2number(new_wordlist[i]) > 0:
