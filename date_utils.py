@@ -1,3 +1,4 @@
+from sympy import N
 from number import extract_number_phrases
 from number import detect_number_phrases_position
 from number import text2number
@@ -103,19 +104,28 @@ def get_separate_numbers(wordlist):
 def get_dates(new_wordlist, number_flag_list):
     state = "START"
     date_sentences = []
+    repeated_nums = []
     date_sent = ""
+    repeated_num_sent = ""
+    repeated_nums_flag = 0
     for i in range(len(new_wordlist)):
         # print(i)
         # print(state)
+        # print(text2number(new_wordlist[i]))
         # print(new_wordlist[i], '\n\n\n\n')
         if state == "START":
             date_sent = ""
             if number_flag_list[i]==1:
-                if text2number(new_wordlist[i]) <= 31 and text2number(new_wordlist[i]) > 0:
+                if text2number(new_wordlist[i]) <= 2030 and text2number(new_wordlist[i]) >1990:
                     date_sent += new_wordlist[i]
-                    state = "DAY"
-                else:
-                    state = "REPEATED NUMS"
+                    date_sentences.append(date_sent)
+                    state = "START"
+                elif not new_wordlist[i].startswith(u'ال'):
+                    if text2number(new_wordlist[i]) <= 31 and text2number(new_wordlist[i]) > 0:
+                        date_sent += new_wordlist[i]
+                        state = "DAY"
+                    else:
+                        state = "REPEATED NUMS"
         elif state == "DAY":
             if number_flag_list[i]==0 and not (new_wordlist[i] in DATE_FILL_WORDS or new_wordlist[i] in MONTH_WORDS):
                 state = "START"
@@ -138,13 +148,22 @@ def get_dates(new_wordlist, number_flag_list):
                     else:
                         state = "REPEATED NUMS"
         elif state == "REPEATED NUMS":
+            repeated_num_sent = date_sent
             date_sent = ""
-            if number_flag_list[i]==0: state = "START"
-
+            if number_flag_list[i]==0: 
+                repeated_nums.append(repeated_num_sent)
+                repeated_nums_flag = 1
+                state = "START"
+            else:
+                repeated_num_sent += " " + new_wordlist[i]
     else:
-        if state == "MONTH" or state == "YEAR":
+        if state == "MONTH":
             date_sentences.append(date_sent)
-    return date_sentences
+        if state == "REPEATED NUMS" or state:
+            repeated_nums.append(repeated_num_sent)
+            repeated_nums_flag = 1
+            date_sentences.append(date_sent)
+    return date_sentences, repeated_nums_flag, repeated_nums
 
     
 def extract_date(text, wordlist):
@@ -188,14 +207,24 @@ def extract_date(text, wordlist):
         for n in num_phrases:
             nn = text2number(n)
             if nn==0: nn = n
-            if day == -1:
+            if day == -1 and nn>0 and nn<=31:
                 day = nn
-            elif month == -1:
+            elif year == -1 and nn>1990 and nn<=2030:
+                year = nn
+            elif month == -1 and nn<=12 and nn>0:
                 month = nn
             else:
                 year = nn
     return day, month, year
 
+def extract_repeated_numbers(text, wordlist):
+    num = ""
+    num_phrases, *_ = get_separate_numbers(wordlist)
+    for n in num_phrases:
+        nn = text2number(n)
+        if nn == 0: nn = n
+        num += str(nn)
+    return num
 
 if __name__ == '__main__':
     txt = "رفعت الجلسة يوم سبعتاشر من فبراير عشرين اتنين وعشرين بعد"

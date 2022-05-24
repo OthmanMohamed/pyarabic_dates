@@ -73,7 +73,7 @@ def get_time(new_wordlist, number_flag_list):
                 time_sent += " " + new_wordlist[i]
                 time_sentences.append(time_sent)
                 state = "START"
-            elif number_flag_list[i] == 0 and not number_flag_list[i][1:] in TIME_FRACTIONS.keys():
+            elif number_flag_list[i] == 0 and not new_wordlist[i][1:] in TIME_FRACTIONS.keys():
                 time_sentences.append(time_sent)
                 state = "START"
     else:
