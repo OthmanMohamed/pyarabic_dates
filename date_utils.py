@@ -148,7 +148,7 @@ def get_dates(new_wordlist, number_flag_list):
                     else:
                         state = "REPEATED NUMS"
         elif state == "REPEATED NUMS":
-            repeated_num_sent = date_sent
+            if repeated_num_sent == "": repeated_num_sent = date_sent
             date_sent = ""
             if number_flag_list[i]==0: 
                 repeated_nums.append(repeated_num_sent)
@@ -222,7 +222,7 @@ def extract_repeated_numbers(text, wordlist):
     num_phrases, *_ = get_separate_numbers(wordlist)
     for n in num_phrases:
         nn = text2number(n)
-        if nn == 0: nn = n
+        if nn == 0 and (n != 'صفر' and n != 'زيرو'): nn = n
         num += str(nn)
     return num
 

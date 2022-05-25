@@ -11,7 +11,7 @@ def process_dates(txt):
     separate_numbers, new_wordlist, number_flag_list = get_separate_numbers(wordlist)
     # print("new_wordlist : ", new_wordlist, "\n\n\n")
     date_sentences, repeated_nums_flag, repeated_nums = get_dates(new_wordlist, number_flag_list)
-    print(repeated_nums)
+    print("repeated_nums : ", repeated_nums)
     time_sentences = get_time(new_wordlist, number_flag_list)
     if date_sentences == ['']: date_sentences = []
     if time_sentences == ['']: time_sentences = []
