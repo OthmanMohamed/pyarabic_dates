@@ -20,8 +20,11 @@ class TestSum(unittest.TestCase):
         for i, tc in enumerate(self.test_cases_list):
             with self.subTest(i=i):
                 rval, *_ = process_dates(tc['sentence']) 
+                success_flag = 1
                 for v in tc['values']:
+                    if not v in rval: success_flag = 0
                     self.assertIn(v, rval)
+                if success_flag == 1: print("SUCCEDED i: ", i, " SENT: ", rval)
 
     # def test_day_month_year(self):
     #     with self.subTest(i=1):

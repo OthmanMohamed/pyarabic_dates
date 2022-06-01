@@ -4,14 +4,24 @@ from number import detect_number_phrases_position, text2number
 import araby
 from dates_const import DATE_FILL_WORDS, MONTH_WORDS, DAY_DEFINING_WORDS
 import os  
+import re
+
+def add_pattern_brackets(original_txt, pattern, index):
+    split_txt = original_txt.split()
+    final_txt = " ".join(split_txt[:index]) + ' (' + pattern + ') ' + " ".join(split_txt[index:])
+    return final_txt
+
 
 def process_dates(txt):
+    # REPLACE و WITH SPACES
+    txt = txt.replace(u' و ', u' و')
+    brack_txt = txt
     txt, wordlist = prepare_txt(txt)
     # print("wordlist : ", wordlist)
-    separate_numbers, new_wordlist, number_flag_list = get_separate_numbers(wordlist)
+    _, new_wordlist, number_flag_list = get_separate_numbers(wordlist)
+    # print(separate_numbers)
     # print("new_wordlist : ", new_wordlist, "\n\n\n")
     date_sentences, repeated_nums_flag, repeated_nums = get_dates(new_wordlist, number_flag_list)
-    print("repeated_nums : ", repeated_nums)
     time_sentences = get_time(new_wordlist, number_flag_list)
     if date_sentences == ['']: date_sentences = []
     if time_sentences == ['']: time_sentences = []
@@ -19,6 +29,24 @@ def process_dates(txt):
     date_flag = 0
     time_flag = 0
     year_flag = 0
+    for t in time_sentences:
+        if t == '': continue
+        new_t, t_wordlist = prepare_txt(t)
+        hours, minutes = extract_time(new_t, t_wordlist)
+        if hours == -1 or minutes == -1: continue
+        else:
+            time_flag = 1
+            for i, w in enumerate(txt.split()):
+                if w == t.split()[0]:
+                    flag = 1
+                    j = i
+                    while j<len(txt.split()) and j-i < len(t.split()):
+                        if txt.split()[j] != t.split()[j-i]: flag = 0
+                        j += 1
+                    if flag == 1: end_pattern_index = i + len(t.split())
+            brack_txt = add_pattern_brackets(brack_txt, f'{int(hours):02d}' + ":" + f'{int(minutes):02d}' , end_pattern_index)
+            txt = add_pattern_brackets(txt, f'{int(hours):02d}' + ":" + f'{int(minutes):02d}' , end_pattern_index)
+            # txt = txt.replace(t, f'{int(hours):02d}' + ":" + f'{int(minutes):02d}')
     for d in date_sentences:
         if d == '': continue
         new_d, d_wordlist = prepare_txt(d)
@@ -27,38 +55,68 @@ def process_dates(txt):
         if year != -1:
             date_flag = 1
             year_flag = 1
+            for i, w in enumerate(txt.split()):
+                if w == d.split()[0]:
+                    flag = 1
+                    j = i
+                    while j<len(txt.split()) and j-i < len(d.split()):
+                        if txt.split()[j] != d.split()[j-i]: flag = 0
+                        j += 1
+                    if flag == 1: end_pattern_index = i + len(d.split())
             if month != -1 and day != -1:
-                txt = txt.replace(d, str(year) + "/" + str(month) + "/" + str(day))
+                brack_txt = add_pattern_brackets(brack_txt, str(year) + "/" + str(month) + "/" + str(day), end_pattern_index)
+                txt = add_pattern_brackets(txt, str(year) + "/" + str(month) + "/" + str(day), end_pattern_index)
+                # txt = txt.replace(d, str(year) + "/" + str(month) + "/" + str(day))
             else:
-                txt = txt.replace(d, str(year))
-        elif day != -1 or month != -1:
+                brack_txt = add_pattern_brackets(brack_txt, str(year), end_pattern_index)
+                txt = add_pattern_brackets(txt, str(year), end_pattern_index)
+                # txt = txt.replace(d, str(year))
+        elif day != -1 and month != -1:
             index = txt.find(d)
+            for i, w in enumerate(txt.split()):
+                if w == d.split()[0]:
+                    flag = 1
+                    j = i
+                    while j<len(txt.split()) and j-i < len(d.split()):
+                        if txt.split()[j] != d.split()[j-i]: flag = 0
+                        j += 1
+                    if flag == 1: end_pattern_index = i + len(d.split())
             if index == 0: continue
             tokenized = araby.tokenize(txt[:index])
-            print(tokenized)
             if tokenized[-1] in DAY_DEFINING_WORDS:
-                txt = txt.replace(d, str(month) + "/" + str(day))
+                brack_txt = add_pattern_brackets(brack_txt, str(month) + "/" + str(day), end_pattern_index)
+                txt = add_pattern_brackets(txt, str(month) + "/" + str(day), end_pattern_index)
+                # txt = txt.replace(d, str(month) + "/" + str(day))
                 date_flag = 1
     for r in repeated_nums:
         if r == '': continue
+        for i, w in enumerate(txt.split()):
+                if w == r.split()[0]:
+                    flag = 1
+                    j = i
+                    while j<len(txt.split()) and j-i < len(r.split()):
+                        if txt.split()[j] != r.split()[j-i]: flag = 0
+                        j += 1
+                    if flag == 1: end_pattern_index = i + len(r.split())
+                    break
         new_r, r_wordlist = prepare_txt(r)
         num = extract_repeated_numbers(new_r, r_wordlist)
-        txt = txt.replace(r, num)
-    for t in time_sentences:
-        if t == '': continue
-        new_t, t_wordlist = prepare_txt(t)
-        hours, minutes = extract_time(new_t, t_wordlist)
-        if hours == -1 or minutes == -1: continue
-        else:
-            time_flag = 1
-            txt = txt.replace(t, f'{int(hours):02d}' + ":" + f'{int(minutes):02d}')
-    return txt, date_flag, year_flag, time_flag, repeated_nums_flag
+        brack_txt = add_pattern_brackets(brack_txt, num, end_pattern_index)
+        txt = add_pattern_brackets(txt, num, end_pattern_index)
+        # txt = txt.replace(r, num)
+    txt = re.sub(r'(\d)\s+(\d)', r'\1\2', txt)
+    return txt, date_flag, year_flag, time_flag, repeated_nums_flag, brack_txt
 
 def main():
-    # txt = "  قبل اتنين وعشرين تسعة الفين وعشرة الساعة تمانية ونص مساء وحوالي تلات تيام تاريخ العاشر من يونيو عشرين واحد و عشرين الساعة العاشرة وخمس دقائق"
-    txt = "بطاقة تحقيق شخصية رقم اتنين تمانية سبعة صفر واحد اتنين تسعة اتنين سبعة صفر صفر صفر تلاتة واحد "
-    new_txt, date_flag, year_flag, time_flag, repeated_nums_flag = process_dates(txt)
-    if date_flag or time_flag or repeated_nums_flag: print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
+    txts = []
+    txts.append( "  قبل اتنين وعشرين تسعة الفين وعشرة الساعة تمانية ونص مساء وحوالي تلات تيام تاريخ العاشر من يونيو عشرين واحد و عشرين الساعة العاشرة وخمس دقائق" )
+    txts.append( "رقم القيد خمسمية سبعة وسبعين الف ستمية اتنين وخمسين " )
+    txts.append( "فتح المحضر اليوم الموافق ستاشر سبعة الفين واتنين وعشرين الساعة واحدة وتلاتين دقيقة" )
+
+    for txt in txts:
+        new_txt, date_flag, year_flag, time_flag, repeated_nums_flag, brack_txt = process_dates(txt)
+        if date_flag or time_flag or repeated_nums_flag: print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
+        if date_flag or time_flag or repeated_nums_flag: print("TXT : " , txt, "\n", "NEW : ", brack_txt, "\n\n\n")
     # directory = "/data/mahkama"
     # for filename in os.listdir(directory):
     #     f = os.path.join(directory, filename)

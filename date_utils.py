@@ -13,12 +13,11 @@ def prepare_txt(txt):
     # REPLACE MULTI SPACES
     repeared_spaces = re.compile(r' +')
     txt = repeared_spaces.sub(' ', txt)
-    # REPLACE و WITH SPACES
-    txt = txt.replace(u' و ', u' و')
     # REPLACE COMMON YEAR NAMES "مثال: عشرين عشرين ---> الفين وعشرين"
     for word in YEARS_REPLACE:
         if txt.find(word) != -1:
-            txt = txt.replace(word, YEARS_REPLACE[word])
+            if txt[txt.find(word)-1] != u'و':
+                txt = txt.replace(word, YEARS_REPLACE[word])
     # TOKENIZE
     wordlist = araby.tokenize(txt)
     # REPLACE ORDINALS WITH NUMBER WORDS
@@ -79,9 +78,10 @@ def get_separate_numbers(wordlist):
                             separate_numbers.append(temp_word)
                             new_wordlist.append(temp_word)
                             temp_word = wordlist[i]
+                # elif is_complication(wordlist[i-1]) or is_complication(wordlist[i]):
                 elif is_complication(wordlist[i-1]):
                     temp_word += (" " + wordlist[i])
-                elif wordlist[i] in ACCEPT_NUMBER_PREFIX and text2number(wordlist[i]) > text2number(wordlist[i-1]):
+                elif wordlist[i] in ACCEPT_NUMBER_PREFIX and text2number(wordlist[i]) > text2number(wordlist[i-1]) and text2number(wordlist[i-1])!=0:
                     temp_word += (" " + wordlist[i])
                 else:
                     separate_numbers.append(temp_word)
@@ -125,11 +125,13 @@ def get_dates(new_wordlist, number_flag_list):
                         date_sent += new_wordlist[i]
                         state = "DAY"
                     else:
+                        repeated_num_sent += new_wordlist[i]
                         state = "REPEATED NUMS"
         elif state == "DAY":
             if number_flag_list[i]==0 and not (new_wordlist[i] in DATE_FILL_WORDS or new_wordlist[i] in MONTH_WORDS):
                 state = "START"
             elif number_flag_list[i]==1 and (text2number(new_wordlist[i]) < 0 or text2number(new_wordlist[i]) > 12):
+                date_sent += " " + new_wordlist[i]
                 state = "REPEATED NUMS"
             else:
                 date_sent += " " + new_wordlist[i]
@@ -159,7 +161,8 @@ def get_dates(new_wordlist, number_flag_list):
     else:
         if state == "MONTH":
             date_sentences.append(date_sent)
-        if state == "REPEATED NUMS" or state:
+        if state == "REPEATED NUMS":
+            if repeated_num_sent == "": repeated_num_sent = date_sent
             repeated_nums.append(repeated_num_sent)
             repeated_nums_flag = 1
             date_sentences.append(date_sent)
