@@ -22,6 +22,7 @@ class TestSum(unittest.TestCase):
                 rval, *_ = process_dates(tc['sentence']) 
                 success_flag = 1
                 for v in tc['values']:
+                    v = '(' + str(v).strip() + ')'
                     if not v in rval: success_flag = 0
                     self.assertIn(v, rval)
                 if success_flag == 1: print("SUCCEDED i: ", i, " SENT: ", rval)

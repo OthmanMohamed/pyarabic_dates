@@ -199,12 +199,12 @@ def extract_date(text, wordlist):
                         day = nn
                     elif month == -1:
                         month = nn
-                    else:
+                    elif int(nn)>1900 and int(nn)<2030:
                         year = nn
             else:
                 if day == -1: 
                     day = nn
-                else:
+                elif int(nn)>1900 and int(nn)<2030:
                     year = nn
     else:
         for n in num_phrases:
@@ -216,7 +216,7 @@ def extract_date(text, wordlist):
                 year = nn
             elif month == -1 and nn<=12 and nn>0:
                 month = nn
-            else:
+            elif int(nn)>1900 and int(nn)<2030:
                 year = nn
     return day, month, year
 
