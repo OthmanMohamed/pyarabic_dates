@@ -9,7 +9,11 @@ import re
 
 def add_pattern_brackets(original_txt, pattern, index):
     split_txt = original_txt.split()
-    final_txt = " ".join(split_txt[:index]) + ' (' + pattern + ') ' + " ".join(split_txt[index:])
+    check_index = min(len(split_txt)-1, index)
+    if split_txt[check_index] != '(' + pattern + ')':
+        final_txt = " ".join(split_txt[:index]) + ' (' + pattern + ') ' + " ".join(split_txt[index:])
+    else:
+        final_txt = original_txt
     return final_txt
 
 
@@ -109,6 +113,7 @@ def process_dates(txt):
     for r in repeated_nums:
         if r == '': continue
         if any(r in string for string in time_sentences): continue
+        end_pattern_index = -1
         for i, w in enumerate(txt.split()):
                 if w == r.split()[0]:
                     flag = 1
@@ -120,7 +125,7 @@ def process_dates(txt):
                     break
         new_r, r_wordlist = prepare_txt(r)
         num = extract_repeated_numbers(new_r, r_wordlist)
-        brack_txt = add_pattern_brackets(brack_txt, num, end_pattern_index)
+        if end_pattern_index >= 0: brack_txt = add_pattern_brackets(brack_txt, num, end_pattern_index)
         txt = add_pattern_brackets(txt, num, end_pattern_index)
         # txt = txt.replace(r, num)
     txt = re.sub(r'(\d)\s+(\d)', r'\1\2', txt)
@@ -128,9 +133,9 @@ def process_dates(txt):
 
 def main():
     txts = []
-    # txts.append( "  قبل اتنين وعشرين تسعة الفين وعشرة الساعة تمانية ونص مساء وحوالي تلات تيام تاريخ العاشر من يونيو عشرين واحد و عشرين الساعة العاشرة وخمس دقائق" )
-    # txts.append( "رقم القيد خمسمية سبعة وسبعين الف ستمية اتنين وخمسين " )
-    # txts.append( "فتح المحضر اليوم الموافق ستاشر سبعة الفين واتنين وعشرين الساعة واحدة وتلاتين دقيقة" )
+    txts.append( "  قبل اتنين وعشرين تسعة الفين وعشرة الساعة تمانية ونص مساء وحوالي تلات تيام تاريخ العاشر من يونيو عشرين واحد و عشرين الساعة العاشرة وخمس دقائق" )
+    txts.append( "رقم القيد خمسمية سبعة وسبعين الف ستمية اتنين وخمسين " )
+    txts.append( "قرار الاخضاع رقم تسعة واربعين (49) لسنة الفين وستاشر (2016)" )
     txts.append("المؤرخ في تلاتة وعشرين ستة الفين واحد وعشرين ورقم صادر عشرين واحد وعشرين اربعتاشر سبعة واحد صفر صفر صفر حداشر واحد وستين المكون من اتنين صفحات ")
 
     for txt in txts:

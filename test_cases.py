@@ -25,7 +25,10 @@ class TestSum(unittest.TestCase):
                     v = '(' + str(v).strip() + ')'
                     if not v in rval: success_flag = 0
                     self.assertIn(v, rval)
-                if success_flag == 1: print("SUCCEDED i: ", i, " SENT: ", rval)
+                if success_flag == 1: 
+                    print("SUCCEDED i: ", i, " SENT: ", rval)
+                    rval, *_ = process_dates(rval)
+                    print("RESUBMITED : ", rval)
 
     # def test_day_month_year(self):
     #     with self.subTest(i=1):

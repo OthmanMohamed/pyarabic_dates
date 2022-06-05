@@ -38,6 +38,8 @@ def prepare_txt(txt):
             # REPLACE ORDINALS CONTAINING ال
             wordlist[i] = inv_UNITS_ORDINAL_WORDS_FEMININ[word[2:]]
         txt = txt + " " + wordlist[i]
+    txt = txt.replace(u' )', u')')
+    txt = txt.replace(u'( ', u'(')
     return txt, wordlist
 
 
@@ -105,8 +107,6 @@ def get_dates(new_wordlist, number_flag_list):
     state = "START"
     date_sentences = []
     repeated_nums = []
-    date_sent = ""
-    repeated_num_sent = ""
     repeated_nums_flag = 0
     for i in range(len(new_wordlist)):
         # print(i)
@@ -115,6 +115,7 @@ def get_dates(new_wordlist, number_flag_list):
         # print(new_wordlist[i], '\n\n\n\n')
         if state == "START":
             date_sent = ""
+            repeated_num_sent = ""
             if number_flag_list[i]==1:
                 if text2number(new_wordlist[i]) <= 2030 and text2number(new_wordlist[i]) >1990:
                     date_sent += new_wordlist[i]
