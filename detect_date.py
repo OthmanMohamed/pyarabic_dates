@@ -31,7 +31,7 @@ def process_dates(txt):
     herz_sentences = get_herz(new_wordlist, number_flag_list)
     if date_sentences == ['']: date_sentences = []
     if time_sentences == ['']: time_sentences = []
-    if repeated_nums == ['']: repeated_nums = []
+    if repeated_nums  == ['']: repeated_nums = []
     if herz_sentences == ['']: herz_sentences = []
     date_flag = 0
     time_flag = 0
@@ -133,15 +133,22 @@ def process_dates(txt):
 
 def main():
     txts = []
-    txts.append( "  قبل اتنين وعشرين تسعة الفين وعشرة الساعة تمانية ونص مساء وحوالي تلات تيام تاريخ العاشر من يونيو عشرين واحد و عشرين الساعة العاشرة وخمس دقائق" )
-    txts.append( "رقم القيد خمسمية سبعة وسبعين الف ستمية اتنين وخمسين " )
-    txts.append( "قرار الاخضاع رقم تسعة واربعين (49) لسنة الفين وستاشر (2016)" )
-    txts.append("المؤرخ في تلاتة وعشرين ستة الفين واحد وعشرين ورقم صادر عشرين واحد وعشرين اربعتاشر سبعة واحد صفر صفر صفر حداشر واحد وستين المكون من اتنين صفحات ")
+    f = open("test/test.txt")
+    t = f.read()
+    f.close()
+    txts.append(t)
+    # txts.append( "  قبل اتنين وعشرين تسعة الفين وعشرة الساعة تمانية ونص مساء وحوالي تلات تيام تاريخ العاشر من يونيو عشرين واحد و عشرين الساعة العاشرة وخمس دقائق" )
+    # txts.append( "رقم القيد خمسمية سبعة وسبعين الف ستمية اتنين وخمسين " )
+    # txts.append( "المبلغ المالي اتناشر الف جنيه محل الحرز مئتين وثلاثة على خمسمية اتنين وتلاتين" )
+    # txts.append("المؤرخ في تلاتة وعشرين ستة الفين واحد وعشرين ورقم صادر عشرين واحد وعشرين اربعتاشر سبعة واحد صفر صفر صفر حداشر واحد وستين المكون من اتنين صفحات ")
 
     for txt in txts:
         new_txt, date_flag, year_flag, time_flag, repeated_nums_flag, brack_txt = process_dates(txt)
-        if date_flag or time_flag or repeated_nums_flag: print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
-        if date_flag or time_flag or repeated_nums_flag: print("TXT : " , txt, "\n", "NEW : ", brack_txt, "\n\n\n")
+        f = open("test/test_out.txt", 'w')
+        f.write(brack_txt)
+        f.close()
+        # if 1 or date_flag or time_flag or repeated_nums_flag: print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
+        # if 1 or date_flag or time_flag or repeated_nums_flag: print("TXT : " , txt, "\n", "NEW : ", brack_txt, "\n\n\n")
     # directory = "/data/mahkama"
     # for filename in os.listdir(directory):
     #     f = os.path.join(directory, filename)

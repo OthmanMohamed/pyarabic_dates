@@ -28,6 +28,7 @@ def get_herz(new_wordlist, number_flag_list):
             else:
                 if separator_flag: herz_sentences.append(herz_sent)
                 herz_sent = 0
+                separator_flag = 0
                 state = "START"
         elif state == "SEPEARATOR":
             if new_wordlist[i] in separators and new_wordlist[i] == new_wordlist[i-1]:

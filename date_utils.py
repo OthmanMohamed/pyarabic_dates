@@ -154,8 +154,9 @@ def get_dates(new_wordlist, number_flag_list):
             if repeated_num_sent == "": repeated_num_sent = date_sent
             date_sent = ""
             if number_flag_list[i]==0: 
-                repeated_nums.append(repeated_num_sent)
-                repeated_nums_flag = 1
+                if not all(s.isnumeric() for s in repeated_num_sent.split()):
+                    repeated_nums.append(repeated_num_sent)
+                    repeated_nums_flag = 1
                 state = "START"
             else:
                 repeated_num_sent += " " + new_wordlist[i]
