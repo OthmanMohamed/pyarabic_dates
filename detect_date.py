@@ -133,7 +133,7 @@ def process_dates(txt):
 
 def main():
     txts = []
-    f = open("test/test.txt")
+    f = open("test/test.txt", encoding='utf-8')
     t = f.read()
     f.close()
     txts.append(t)
@@ -144,7 +144,7 @@ def main():
 
     for txt in txts:
         new_txt, date_flag, year_flag, time_flag, repeated_nums_flag, brack_txt = process_dates(txt)
-        f = open("test/test_out.txt", 'w')
+        f = open("test/test_out.txt", 'w', encoding='utf-8')
         f.write(brack_txt)
         f.close()
         # if 1 or date_flag or time_flag or repeated_nums_flag: print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
