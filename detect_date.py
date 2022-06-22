@@ -134,7 +134,8 @@ def process_dates(txt):
 
 def main():
     txts = []
-    f = open("test/test.txt", encoding='utf-8')
+    file_path = sys.argv[1]
+    f = open(file_path, encoding='utf-8')
     t = f.read()
     f.close()
     txts.append(t)
