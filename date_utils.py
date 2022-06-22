@@ -19,7 +19,8 @@ def prepare_txt(txt):
             if txt[txt.find(word)-1] != u'و':
                 txt = txt.replace(word, YEARS_REPLACE[word])
     # TOKENIZE
-    wordlist = araby.tokenize(txt)
+    # wordlist = araby.tokenize(txt)
+    wordlist = txt.split()
     # REPLACE ORDINALS WITH NUMBER WORDS
     inv_UNITS_ORDINAL_WORDS = {v: k for k, v in UNITS_ORDINAL_WORDS.items()}
     inv_UNITS_ORDINAL_WORDS_FEMININ = {v: k for k, v in UNITS_ORDINAL_WORDS_FEMININ.items()}

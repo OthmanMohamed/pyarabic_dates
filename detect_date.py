@@ -6,6 +6,7 @@ import araby
 from dates_const import DATE_FILL_WORDS, MONTH_WORDS, DAY_DEFINING_WORDS
 import os  
 import re
+import sys
 
 def add_pattern_brackets(original_txt, pattern, index):
     split_txt = original_txt.split()
@@ -138,6 +139,7 @@ def main():
     f.close()
     txts.append(t)
     # txts.append( "  قبل اتنين وعشرين تسعة الفين وعشرة الساعة تمانية ونص مساء وحوالي تلات تيام تاريخ العاشر من يونيو عشرين واحد و عشرين الساعة العاشرة وخمس دقائق" )
+    # txts.append("الحرز رقم ميتين وستاشر على اتناشر أأشياء قسم الاقصر")
     # txts.append( "رقم القيد خمسمية سبعة وسبعين الف ستمية اتنين وخمسين " )
     # txts.append( "المبلغ المالي اتناشر الف جنيه محل الحرز مئتين وثلاثة على خمسمية اتنين وتلاتين" )
     # txts.append("المؤرخ في تلاتة وعشرين ستة الفين واحد وعشرين ورقم صادر عشرين واحد وعشرين اربعتاشر سبعة واحد صفر صفر صفر حداشر واحد وستين المكون من اتنين صفحات ")
