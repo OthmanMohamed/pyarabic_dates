@@ -134,24 +134,25 @@ def process_dates(txt):
 
 def main():
     txts = []
-    file_path = sys.argv[1]
-    f = open(file_path, encoding='utf-8')
-    t = f.read()
-    f.close()
-    txts.append(t)
+    # file_path = sys.argv[1]
+    # f = open(file_path, encoding='utf-8')
+    # t = f.read()
+    # f.close()
+    # txts.append(t)
+    txts.append("الصحيفة رقم سبعتاشر وتمنتاشر ")
     # txts.append( "  قبل اتنين وعشرين تسعة الفين وعشرة الساعة تمانية ونص مساء وحوالي تلات تيام تاريخ العاشر من يونيو عشرين واحد و عشرين الساعة العاشرة وخمس دقائق" )
-    # txts.append("الحرز رقم ميتين وستاشر على اتناشر أأشياء قسم الاقصر")
+    # txts.append("يوم الخميس الساعة خمسة وتلاتين دقيقة الساعة اتنين وعشرين دقيقة الحرز رقم ميتين وستاشر على اتناشر أأشياء قسم الاقصر")
     # txts.append( "رقم القيد خمسمية سبعة وسبعين الف ستمية اتنين وخمسين " )
     # txts.append( "المبلغ المالي اتناشر الف جنيه محل الحرز مئتين وثلاثة على خمسمية اتنين وتلاتين" )
     # txts.append("المؤرخ في تلاتة وعشرين ستة الفين واحد وعشرين ورقم صادر عشرين واحد وعشرين اربعتاشر سبعة واحد صفر صفر صفر حداشر واحد وستين المكون من اتنين صفحات ")
 
     for txt in txts:
         new_txt, date_flag, year_flag, time_flag, repeated_nums_flag, brack_txt = process_dates(txt)
-        f = open("test/test_out.txt", 'w', encoding='utf-8')
-        f.write(brack_txt)
-        f.close()
-        # if 1 or date_flag or time_flag or repeated_nums_flag: print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
-        # if 1 or date_flag or time_flag or repeated_nums_flag: print("TXT : " , txt, "\n", "NEW : ", brack_txt, "\n\n\n")
+        # f = open("test/test_out.txt", 'w', encoding='utf-8')
+        # f.write(brack_txt)
+        # f.close()   
+        if 1 or date_flag or time_flag or repeated_nums_flag: print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
+        if 1 or date_flag or time_flag or repeated_nums_flag: print("TXT : " , txt, "\n", "NEW : ", brack_txt, "\n\n\n")
     # directory = "/data/mahkama"
     # for filename in os.listdir(directory):
     #     f = os.path.join(directory, filename)

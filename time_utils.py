@@ -27,7 +27,13 @@ def extract_time(text, wordlist):
         else:
             minutes = int(minutes) + int(nn)
     else:
-        if minutes == -1: minutes = 0
+        if minutes == -1: 
+            if hours >= 20:
+                combined = hours
+                hours = combined%10
+                minutes = combined - hours
+            else:
+                minutes = 0
     return hours, minutes
 
 
@@ -45,7 +51,8 @@ def get_time(new_wordlist, number_flag_list):
             state = "TIME TRIGGERED"
         elif state == "TIME TRIGGERED":
             time_sent = ""
-            if text2number(new_wordlist[i]) <= 24 and text2number(new_wordlist[i]) > 0:
+            # if text2number(new_wordlist[i]) <= 24 and text2number(new_wordlist[i]) > 0:
+            if text2number(new_wordlist[i]) <= 60 and text2number(new_wordlist[i]) > 0:
                 time_sent += new_wordlist[i]
                 state = "HOUR"
             else:

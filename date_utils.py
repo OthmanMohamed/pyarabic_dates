@@ -118,11 +118,11 @@ def get_dates(new_wordlist, number_flag_list):
             date_sent = ""
             repeated_num_sent = ""
             if number_flag_list[i]==1:
-                if text2number(new_wordlist[i]) <= 2030 and text2number(new_wordlist[i]) >1990:
+                if text2number(new_wordlist[i]) <= 2030 and text2number(new_wordlist[i]) >1900:
                     date_sent += new_wordlist[i]
                     date_sentences.append(date_sent)
                     state = "START"
-                elif not new_wordlist[i].startswith(u'ال'):
+                elif (not new_wordlist[i].startswith(u'ال')) or new_wordlist[i].startswith(u'الف'):
                     if text2number(new_wordlist[i]) <= 31 and text2number(new_wordlist[i]) > 0:
                         date_sent += new_wordlist[i]
                         state = "DAY"
@@ -131,6 +131,10 @@ def get_dates(new_wordlist, number_flag_list):
                         state = "REPEATED NUMS"
         elif state == "DAY":
             if number_flag_list[i]==0 and not (new_wordlist[i] in DATE_FILL_WORDS or new_wordlist[i] in MONTH_WORDS):
+                repeated_num_sent = date_sent
+                if not all(s.isnumeric() for s in repeated_num_sent.split()):
+                    repeated_nums.append(repeated_num_sent)
+                    repeated_nums_flag = 1
                 state = "START"
             elif number_flag_list[i]==1 and (text2number(new_wordlist[i]) < 0 or text2number(new_wordlist[i]) > 12):
                 date_sent += " " + new_wordlist[i]
@@ -164,6 +168,9 @@ def get_dates(new_wordlist, number_flag_list):
     else:
         if state == "MONTH":
             date_sentences.append(date_sent)
+        if state == "DAY":
+            repeated_nums.append(date_sent)
+            repeated_nums_flag = 1
         if state == "REPEATED NUMS":
             if repeated_num_sent == "": repeated_num_sent = date_sent
             repeated_nums.append(repeated_num_sent)
