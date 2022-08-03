@@ -74,13 +74,12 @@ def get_separate_numbers(wordlist):
             # print("new_wordlist : ", new_wordlist, "\n\n\n")
             if len(temp_word) == 0: temp_word += wordlist[i]
             else:
-                if wordlist[i].startswith(u'و') and not wordlist[i].startswith(u'واحد') and text2number(wordlist[i]) >= 20:
-                    if i > slice[0]:
-                        if wordlist[i-1] != u'واحدة': temp_word += " " + wordlist[i]
-                        else:
-                            separate_numbers.append(temp_word)
-                            new_wordlist.append(temp_word)
-                            temp_word = wordlist[i]
+                if wordlist[i].startswith(u'و') and not wordlist[i].startswith(u'واحد') and (text2number(wordlist[i]) >= 20 and text2number(wordlist[i]) <= 90 and text2number(wordlist[i-1]) < text2number(wordlist[i])):
+                    if wordlist[i-1] != u'واحدة': temp_word += " " + wordlist[i]
+                    else:
+                        separate_numbers.append(temp_word)
+                        new_wordlist.append(temp_word)
+                        temp_word = wordlist[i]
                 # elif is_complication(wordlist[i-1]) or is_complication(wordlist[i]):
                 elif is_complication(wordlist[i-1]):
                     temp_word += (" " + wordlist[i])
@@ -120,8 +119,7 @@ def get_dates(new_wordlist, number_flag_list):
             if number_flag_list[i]==1:
                 if text2number(new_wordlist[i]) <= 2030 and text2number(new_wordlist[i]) >1900:
                     date_sent += new_wordlist[i]
-                    date_sentences.append(date_sent)
-                    state = "START"
+                    state = "YEAR"
                 elif (not new_wordlist[i].startswith(u'ال')) or new_wordlist[i].startswith(u'الف'):
                     if text2number(new_wordlist[i]) <= 31 and text2number(new_wordlist[i]) > 0:
                         date_sent += new_wordlist[i]
@@ -155,6 +153,13 @@ def get_dates(new_wordlist, number_flag_list):
                         state = "START"
                     else:
                         state = "REPEATED NUMS"
+        elif state == "YEAR":
+            if number_flag_list[i]==0: 
+                date_sentences.append(date_sent)
+                state == "START"
+            else:
+                repeated_num_sent = date_sent + " " + new_wordlist[i]
+                state = "REPEATED NUMS"
         elif state == "REPEATED NUMS":
             if repeated_num_sent == "": repeated_num_sent = date_sent
             date_sent = ""
@@ -166,7 +171,7 @@ def get_dates(new_wordlist, number_flag_list):
             else:
                 repeated_num_sent += " " + new_wordlist[i]
     else:
-        if state == "MONTH":
+        if state == "MONTH" or state == "YEAR":
             date_sentences.append(date_sent)
         if state == "DAY":
             repeated_nums.append(date_sent)
@@ -175,7 +180,6 @@ def get_dates(new_wordlist, number_flag_list):
             if repeated_num_sent == "": repeated_num_sent = date_sent
             repeated_nums.append(repeated_num_sent)
             repeated_nums_flag = 1
-            date_sentences.append(date_sent)
     return date_sentences, repeated_nums_flag, repeated_nums
 
     
@@ -233,10 +237,11 @@ def extract_date(text, wordlist):
 def extract_repeated_numbers(text, wordlist):
     num = ""
     num_phrases, *_ = get_separate_numbers(wordlist)
-    for n in num_phrases:
+    for i, n in enumerate(num_phrases):
         nn = text2number(n)
         if nn == 0 and (n != 'صفر' and n != 'زيرو'): nn = n
-        num += str(nn)
+        if n.startswith(u'و') and not num_phrases[i].startswith(u'واحد') and i>0: num += " و " + str(nn)
+        else: num += str(nn)
     return num
 
 if __name__ == '__main__':
