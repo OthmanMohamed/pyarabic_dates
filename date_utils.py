@@ -3,9 +3,9 @@ from number import extract_number_phrases
 from number import detect_number_phrases_position
 from number import text2number
 import araby
-from number_const import UNITS_ORDINAL_WORDS, UNITS_ORDINAL_WORDS_FEMININ, COMPLICATIONS
+from number_const import UNITS_ORDINAL_WORDS, UNITS_ORDINAL_WORDS_FEMININ, inv_UNITS_ORDINAL_WORDS_FEMININ, inv_UNITS_ORDINAL_WORDS
 from dates_const import ACCEPT_NUMBER_PREFIX, MONTH_WORDS, YEARS_REPLACE
-from dates_const import DATE_FILL_WORDS, DAY_DEFINING_WORDS
+from dates_const import DATE_FILL_WORDS, DAY_DEFINING_WORDS, TEN_PREFIX
 import re
 
 
@@ -22,8 +22,9 @@ def prepare_txt(txt):
     # wordlist = araby.tokenize(txt)
     wordlist = txt.split()
     # REPLACE ORDINALS WITH NUMBER WORDS
-    inv_UNITS_ORDINAL_WORDS = {v: k for k, v in UNITS_ORDINAL_WORDS.items()}
-    inv_UNITS_ORDINAL_WORDS_FEMININ = {v: k for k, v in UNITS_ORDINAL_WORDS_FEMININ.items()}
+    # inv_UNITS_ORDINAL_WORDS = {v: k for k, v in UNITS_ORDINAL_WORDS.items()}
+    # inv_UNITS_ORDINAL_WORDS_FEMININ = {v: k for k, v in UNITS_ORDINAL_WORDS_FEMININ.items()}
+    # print(inv_UNITS_ORDINAL_WORDS_FEMININ)
     txt = ""
     for i, word in enumerate(wordlist):
         if word in inv_UNITS_ORDINAL_WORDS:
@@ -83,8 +84,16 @@ def get_separate_numbers(wordlist):
                 # elif is_complication(wordlist[i-1]) or is_complication(wordlist[i]):
                 elif is_complication(wordlist[i-1]):
                     temp_word += (" " + wordlist[i])
-                elif wordlist[i] in ACCEPT_NUMBER_PREFIX and text2number(wordlist[i]) > text2number(wordlist[i-1]) and text2number(wordlist[i-1])!=0:
-                    temp_word += (" " + wordlist[i])
+                elif (wordlist[i] in ACCEPT_NUMBER_PREFIX) and (text2number(wordlist[i]) > text2number(wordlist[i-1])) and (text2number(wordlist[i-1])!=0):
+                    if (wordlist[i] == u'عشر' or wordlist[i] == u'عشرة')\
+                        and\
+                        (((wordlist[i-1] not in TEN_PREFIX) and (wordlist[i-1][2:] not in TEN_PREFIX)  and  (wordlist[i-1][1:] not in TEN_PREFIX))\
+                        or (i>1 and wordlist[i-2] in DAY_DEFINING_WORDS)) :
+                        separate_numbers.append(temp_word)
+                        new_wordlist.append(temp_word)
+                        temp_word = wordlist[i]
+                    else:
+                        temp_word += (" " + wordlist[i])
                 else:
                     separate_numbers.append(temp_word)
                     new_wordlist.append(temp_word)
@@ -128,6 +137,7 @@ def get_dates(new_wordlist, number_flag_list):
                         repeated_num_sent += new_wordlist[i]
                         state = "REPEATED NUMS"
         elif state == "DAY":
+            print(text2number(new_wordlist[i]))
             if number_flag_list[i]==0 and not (new_wordlist[i] in DATE_FILL_WORDS or new_wordlist[i] in MONTH_WORDS):
                 repeated_num_sent = date_sent
                 if not all(s.isnumeric() for s in repeated_num_sent.split()):
