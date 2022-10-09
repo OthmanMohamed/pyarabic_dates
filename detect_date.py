@@ -19,17 +19,13 @@ def add_pattern_brackets(original_txt, pattern, index):
 
 
 def process_dates(txt):
-    # REPLACE و WITH SPACES
-    txt = txt.replace(u' و ', u' و')
-    brack_txt = txt
     txt, wordlist = prepare_txt(txt)
-    # print("wordlist : ", wordlist)
+    brack_txt = txt
     _, new_wordlist, number_flag_list = get_separate_numbers(wordlist)
-    # print(separate_numbers)
-    # print("new_wordlist : ", new_wordlist, "\n\n\n")
     date_sentences, repeated_nums_flag, repeated_nums = get_dates(new_wordlist, number_flag_list)
     time_sentences = get_time(new_wordlist, number_flag_list)
     herz_sentences = get_herz(new_wordlist, number_flag_list)
+
     if date_sentences == ['']: date_sentences = []
     if time_sentences == ['']: time_sentences = []
     if repeated_nums  == ['']: repeated_nums = []
@@ -37,6 +33,7 @@ def process_dates(txt):
     date_flag = 0
     time_flag = 0
     year_flag = 0
+
     for h in herz_sentences:
         if h == '': continue
         new_h, h_wordlist = prepare_txt(h)
@@ -52,6 +49,7 @@ def process_dates(txt):
                     break
         brack_txt = add_pattern_brackets(brack_txt, herz_sent, end_pattern_index)
         txt = add_pattern_brackets(txt, herz_sent, end_pattern_index)
+    
     for t in time_sentences:
         if t == '': continue
         new_t, t_wordlist = prepare_txt(t)
@@ -70,6 +68,7 @@ def process_dates(txt):
             brack_txt = add_pattern_brackets(brack_txt, f'{int(hours):02d}' + ":" + f'{int(minutes):02d}' , end_pattern_index)
             txt = add_pattern_brackets(txt, f'{int(hours):02d}' + ":" + f'{int(minutes):02d}' , end_pattern_index)
             # txt = txt.replace(t, f'{int(hours):02d}' + ":" + f'{int(minutes):02d}')
+    
     for d in date_sentences:
         if d == '': continue
         new_d, d_wordlist = prepare_txt(d)
@@ -111,6 +110,7 @@ def process_dates(txt):
                 txt = add_pattern_brackets(txt, str(month) + "/" + str(day), end_pattern_index)
                 # txt = txt.replace(d, str(month) + "/" + str(day))
                 date_flag = 1
+    
     for r in repeated_nums:
         if r == '': continue
         if any(r in string for string in time_sentences): continue
@@ -129,6 +129,7 @@ def process_dates(txt):
         if end_pattern_index >= 0: brack_txt = add_pattern_brackets(brack_txt, num, end_pattern_index)
         txt = add_pattern_brackets(txt, num, end_pattern_index)
         # txt = txt.replace(r, num)
+    
     txt = re.sub(r'(\d)\s+(\d)', r'\1\2', txt)
     return brack_txt, date_flag, year_flag, time_flag, repeated_nums_flag, txt
 
@@ -140,7 +141,8 @@ def main():
     # f.close()
     # txts.append(t)
 
-    txts.append("اتنين عشرة عشرين عشرين")
+    # txts.append("الصحيفة رقم مية اربعة وسبعين (174) من يوم اتنين عشرة عشرين عشرين (2020)")
+    txts.append("الجلسة الثالثه يوم تسعه وعشرين اتناشر الفين واحد وعشرين")
     # txts.append("من يوم الثاني عشرة عشرين عشرين ")
 
     # txts.append( "  قبل اتنين وعشرين تسعة الفين وعشرة الساعة تمانية ونص مساء وحوالي تلات تيام تاريخ العاشر من يونيو عشرين واحد و عشرين الساعة العاشرة وخمس دقائق" )

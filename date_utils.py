@@ -8,15 +8,21 @@ from dates_const import ACCEPT_NUMBER_PREFIX, MONTH_WORDS, YEARS_REPLACE
 from dates_const import DATE_FILL_WORDS, DAY_DEFINING_WORDS, TEN_PREFIX
 import re
 
-
 def prepare_txt(txt):
+    # REPLACE و WITH SPACES
+    txt = txt.replace(u' و ', u' و')
+    # Normalize Letters
+    txt = txt.replace(u'أ', u'ا')
+    txt = txt.replace(u'إ', u'ا')
+    txt = txt.replace(u'ه ', u'ة ')
+    txt = txt.replace('ه\n', 'ة\n')
     # REPLACE MULTI SPACES
-    repeared_spaces = re.compile(r' +')
-    txt = repeared_spaces.sub(' ', txt)
+    # repeared_spaces = re.compile(r' +')
+    # txt = repeared_spaces.sub(' ', txt)
     # REPLACE COMMON YEAR NAMES "مثال: عشرين عشرين ---> الفين وعشرين"
     for word in YEARS_REPLACE:
         if txt.find(word) != -1:
-            if txt[txt.find(word)-1] != u'و':
+            if txt[txt.find(word)-1] != u'و': # To avoid wrongly detecting repeated numbers
                 txt = txt.replace(word, YEARS_REPLACE[word])
     # TOKENIZE
     # wordlist = araby.tokenize(txt)
