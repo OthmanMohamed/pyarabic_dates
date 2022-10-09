@@ -1,4 +1,4 @@
-from sympy import N
+# from sympy import N
 from number import extract_number_phrases
 from number import detect_number_phrases_position
 from number import text2number
@@ -91,7 +91,7 @@ def get_separate_numbers(wordlist):
                 elif is_complication(wordlist[i-1]):
                     temp_word += (" " + wordlist[i])
                 elif (wordlist[i] in ACCEPT_NUMBER_PREFIX) and (text2number(wordlist[i]) > text2number(wordlist[i-1])) and (text2number(wordlist[i-1])!=0):
-                    if (wordlist[i] == u'عشر' or wordlist[i] == u'عشرة')\
+                    if (wordlist[i] == u'عشر' or wordlist[i] == u'عشرة' or wordlist[i] == u'عشره')\
                         and\
                         (((wordlist[i-1] not in TEN_PREFIX) and (wordlist[i-1][2:] not in TEN_PREFIX)  and  (wordlist[i-1][1:] not in TEN_PREFIX))\
                         or (i>1 and wordlist[i-2] in DAY_DEFINING_WORDS)) :
