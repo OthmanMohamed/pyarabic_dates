@@ -37,11 +37,12 @@ def extract_time(text, wordlist):
     return hours, minutes
 
 
-def get_time(new_wordlist, number_flag_list):
+def get_time(new_wordlist, number_flag_list, special_session_flag_list):
     state = "START"
     time_sentences = []
     time_sent = ""
     for i in range(len(new_wordlist)):
+        if special_session_flag_list[i] == 1: continue
         # print(i)
         # print(state)
         # print(text2number(new_wordlist[i]))

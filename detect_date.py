@@ -1,4 +1,4 @@
-from date_utils import prepare_txt, get_separate_numbers, extract_date, get_dates, extract_repeated_numbers
+from date_utils import prepare_txt, get_separate_numbers, extract_date, get_dates, extract_repeated_numbers, get_special_sessions_number
 from time_utils import get_time, extract_time
 from herz_utils import get_herz, extract_herz
 from number import detect_number_phrases_position, text2number
@@ -22,9 +22,12 @@ def process_dates(txt):
     txt, wordlist = prepare_txt(txt)
     brack_txt = txt
     _, new_wordlist, number_flag_list = get_separate_numbers(wordlist)
-    date_sentences, repeated_nums_flag, repeated_nums = get_dates(new_wordlist, number_flag_list)
-    time_sentences = get_time(new_wordlist, number_flag_list)
-    herz_sentences = get_herz(new_wordlist, number_flag_list)
+    sessions_sentences, special_session_flag_list = get_special_sessions_number(new_wordlist, number_flag_list)
+    #TO BE REMOVED, BUT NEED FIRST TO HANDLE CASES LIKE 'تم فتح المحضر ثلاثة عشر (13) من يناير عام الفين اثنان وعشرين (2022)'
+    special_session_flag_list = [0] * len(number_flag_list)
+    date_sentences, repeated_nums_flag, repeated_nums = get_dates(new_wordlist, number_flag_list, special_session_flag_list)
+    time_sentences = get_time(new_wordlist, number_flag_list, special_session_flag_list)
+    herz_sentences = get_herz(new_wordlist, number_flag_list, special_session_flag_list)
 
     if date_sentences == ['']: date_sentences = []
     if time_sentences == ['']: time_sentences = []
@@ -141,12 +144,9 @@ def main():
     # f.close()
     # txts.append(t)
 
-<<<<<<< HEAD
     # txts.append("الصحيفة رقم مية اربعة وسبعين (174) من يوم اتنين عشرة عشرين عشرين (2020)")
     txts.append("الجلسة الثالثه يوم تسعه وعشرين اتناشر الفين واحد وعشرين")
-=======
-    txts.append("في الساعه إحدى عشره صباحا وثلاثين دقيقه فتح المحضر")
->>>>>>> a6e85b841a18c4b48918c7c557fbb13e5725c3c5
+    # txts.append("في الساعه إحدى عشره صباحا وثلاثين دقيقه فتح المحضر")
     # txts.append("من يوم الثاني عشرة عشرين عشرين ")
 
     # txts.append( "  قبل اتنين وعشرين تسعة الفين وعشرة الساعة تمانية ونص مساء وحوالي تلات تيام تاريخ العاشر من يونيو عشرين واحد و عشرين الساعة العاشرة وخمس دقائق" )

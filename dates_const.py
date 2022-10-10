@@ -1,3 +1,10 @@
+SPECIAL_SESSIONS_WORDS = [
+    u'جلسة',
+    u'قضية',
+    u'محضر',
+    u'تحقيق'
+]
+
 ACCEPT_NUMBER_PREFIX = [
     u'الاف',
     u'الف',

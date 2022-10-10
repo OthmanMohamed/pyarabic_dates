@@ -4,7 +4,7 @@ from number import detect_number_phrases_position
 from number import text2number
 import araby
 from number_const import UNITS_ORDINAL_WORDS, UNITS_ORDINAL_WORDS_FEMININ, inv_UNITS_ORDINAL_WORDS_FEMININ, inv_UNITS_ORDINAL_WORDS
-from dates_const import ACCEPT_NUMBER_PREFIX, MONTH_WORDS, YEARS_REPLACE
+from dates_const import ACCEPT_NUMBER_PREFIX, MONTH_WORDS, YEARS_REPLACE, SPECIAL_SESSIONS_WORDS
 from dates_const import DATE_FILL_WORDS, DAY_DEFINING_WORDS, TEN_PREFIX
 import re
 
@@ -117,18 +117,46 @@ def get_separate_numbers(wordlist):
             flags_list.append(0)
     return separate_numbers, new_wordlist, flags_list
 
+def get_special_sessions_number(new_wordlist, number_flag_list):
+    sessions_sentences = []
+    flags_list = []
+    i = 0
+    while i < len(new_wordlist):
+        if any(word in new_wordlist[i] for word in SPECIAL_SESSIONS_WORDS):
+            session_sent = new_wordlist[i]
+            flags_list.append(1)
+            special_session_flag = 0
+            while i+1 < len(new_wordlist) and number_flag_list[i+1] == 1:
+                flags_list.append(1)
+                special_session_flag = 1
+                session_sent += " " + new_wordlist[i+1]
+                i += 1
+            if special_session_flag: sessions_sentences.append(session_sent)
+        else:
+            flags_list.append(0)
+        i += 1
+    return sessions_sentences, flags_list
 
-def get_dates(new_wordlist, number_flag_list):
+def get_dates(new_wordlist, number_flag_list, special_session_flag_list):
     state = "START"
     date_sentences = []
     repeated_nums = []
     repeated_nums_flag = 0
+    repeated_num_sent = ""
     for i in range(len(new_wordlist)):
         # print(i)
         # print(state)
         # print(text2number(new_wordlist[i]))
         # print(new_wordlist[i], '\n\n\n\n')
         if state == "START":
+            if repeated_nums_flag and not repeated_num_sent == "":
+                repeated_nums.append(repeated_num_sent)
+            if special_session_flag_list[i] == 1:
+                if number_flag_list[i] == 1:
+                    repeated_num_sent += new_wordlist[i]
+                    repeated_nums_flag = 1
+                continue
+
             date_sent = ""
             repeated_num_sent = ""
             if number_flag_list[i]==1:

@@ -4,12 +4,13 @@ from date_utils import get_separate_numbers
 separators = ["على", "علي", "فصلة"]
 separators_dict = {"على" : "/", "علي" : "/" , "فصلة" : ","}
 
-def get_herz(new_wordlist, number_flag_list):
+def get_herz(new_wordlist, number_flag_list, special_session_flag_list):
     state = "START"
     herz_sentences = []
     herz_sent = ""
     separator_flag = 0
     for i in range(len(new_wordlist)):
+        if special_session_flag_list[i] == 1: continue
         if state == "START":
             herz_sent = ""
             if number_flag_list[i] == 1:
