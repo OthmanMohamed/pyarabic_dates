@@ -2,7 +2,6 @@
 from number import extract_number_phrases
 from number import detect_number_phrases_position
 from number import text2number
-import araby
 from number_const import UNITS_ORDINAL_WORDS, UNITS_ORDINAL_WORDS_FEMININ, inv_UNITS_ORDINAL_WORDS_FEMININ, inv_UNITS_ORDINAL_WORDS
 from dates_const import ACCEPT_NUMBER_PREFIX, MONTH_WORDS, YEARS_REPLACE, SPECIAL_SESSIONS_WORDS
 from dates_const import DATE_FILL_WORDS, DAY_DEFINING_WORDS, TEN_PREFIX
@@ -46,8 +45,8 @@ def prepare_txt(txt):
             # REPLACE ORDINALS CONTAINING ال
             wordlist[i] = inv_UNITS_ORDINAL_WORDS_FEMININ[word[2:]]
         txt = txt + " " + wordlist[i]
-    txt = txt.replace(u' )', u')')
-    txt = txt.replace(u'( ', u'(')
+    # txt = txt.replace(u' )', u')')
+    # txt = txt.replace(u'( ', u'(')
     return txt, wordlist
 
 
@@ -137,94 +136,124 @@ def get_special_sessions_number(new_wordlist, number_flag_list):
         i += 1
     return sessions_sentences, flags_list
 
-def get_dates(new_wordlist, number_flag_list, special_session_flag_list):
-    state = "START"
-    date_sentences = []
-    repeated_nums = []
-    repeated_nums_flag = 0
+def get_repeated_nums(new_wordlist, number_flag_list, dates_flags_list, times_flags_list):
     repeated_num_sent = ""
+    repeated_nums_flag = 0
+    repeated_nums = []
     for i in range(len(new_wordlist)):
-        # print(i)
-        # print(state)
-        # print(text2number(new_wordlist[i]))
-        # print(new_wordlist[i], '\n\n\n\n')
-        if state == "START":
-            if repeated_nums_flag and not repeated_num_sent == "":
-                repeated_nums.append(repeated_num_sent)
-            if special_session_flag_list[i] == 1:
-                if number_flag_list[i] == 1:
-                    repeated_num_sent += new_wordlist[i]
-                    repeated_nums_flag = 1
-                continue
-
-            date_sent = ""
-            repeated_num_sent = ""
-            if number_flag_list[i]==1:
-                if text2number(new_wordlist[i]) <= 2030 and text2number(new_wordlist[i]) >1900:
-                    date_sent += new_wordlist[i]
-                    state = "YEAR"
-                elif (not new_wordlist[i].startswith(u'ال')) or new_wordlist[i].startswith(u'الف'):
-                    if text2number(new_wordlist[i]) <= 31 and text2number(new_wordlist[i]) > 0:
-                        date_sent += new_wordlist[i]
-                        state = "DAY"
-                    else:
-                        repeated_num_sent += new_wordlist[i]
-                        state = "REPEATED NUMS"
-        elif state == "DAY":
-            print(text2number(new_wordlist[i]))
-            if number_flag_list[i]==0 and not (new_wordlist[i] in DATE_FILL_WORDS or new_wordlist[i] in MONTH_WORDS):
-                repeated_num_sent = date_sent
+        if dates_flags_list[i] == 1 or times_flags_list[i] == 1: continue
+        if number_flag_list[i] == 1:
+            repeated_num_sent += " " + new_wordlist[i]
+        if number_flag_list[i] == 0 and repeated_num_sent != "": 
                 if not all(s.isnumeric() for s in repeated_num_sent.split()):
                     repeated_nums.append(repeated_num_sent)
                     repeated_nums_flag = 1
+                    repeated_num_sent = ""
+    else:
+        if repeated_num_sent != "":
+            repeated_nums.append(repeated_num_sent)
+            repeated_nums_flag = 1
+    return repeated_nums, repeated_nums_flag
+
+
+def get_dates(new_wordlist, number_flag_list):
+    state = "START"
+    date_sentences = []
+    dates_flags_list = [0] * len(new_wordlist)
+    for i in range(len(new_wordlist)):
+        if state == "START":
+            # if repeated_nums_flag and not repeated_num_sent == "":
+            #     repeated_nums.append(repeated_num_sent)
+            # if special_session_flag_list[i] == 1:
+            #     if number_flag_list[i] == 1:
+            #         repeated_num_sent += new_wordlist[i]
+            #         repeated_nums_flag = 1
+            #     continue
+            dates_indices = []
+            date_sent = ""
+            # repeated_num_sent = ""
+            if number_flag_list[i]==1:
+                # if text2number(new_wordlist[i]) <= 2030 and text2number(new_wordlist[i]) >1900:
+                #     date_sent += new_wordlist[i]
+                #     dates_indices.append(i)
+                #     state = "YEAR"
+                # elif text2number(new_wordlist[i]) <= 31 and text2number(new_wordlist[i]) > 0:
+                if (not new_wordlist[i].startswith(u'ال')) or new_wordlist[i].startswith(u'الف'):
+                    if text2number(new_wordlist[i]) <= 31 and text2number(new_wordlist[i]) > 0:
+                        date_sent += new_wordlist[i]
+                        dates_indices.append(i)
+                        state = "DAY"
+                # else:
+                #     repeated_num_sent += new_wordlist[i]
+                #     state = "REPEATED NUMS"
+        elif state == "DAY":
+            if number_flag_list[i]==0 and not (new_wordlist[i] in DATE_FILL_WORDS or new_wordlist[i] in MONTH_WORDS):
+                # repeated_num_sent = date_sent
+                # if not all(s.isnumeric() for s in repeated_num_sent.split()):
+                #     repeated_nums.append(repeated_num_sent)
+                #     repeated_nums_flag = 1
                 state = "START"
-            elif number_flag_list[i]==1 and (text2number(new_wordlist[i]) < 0 or text2number(new_wordlist[i]) > 12):
+            # elif number_flag_list[i]==1 and (text2number(new_wordlist[i]) < 0 or text2number(new_wordlist[i]) > 12):
+            #     date_sent += " " + new_wordlist[i]
+            #     state = "REPEATED NUMS"
+            elif (number_flag_list[i]==1 and (text2number(new_wordlist[i]) > 0 and text2number(new_wordlist[i]) <= 12)) or new_wordlist[i] in MONTH_WORDS or new_wordlist[i] in DATE_FILL_WORDS:
                 date_sent += " " + new_wordlist[i]
-                state = "REPEATED NUMS"
-            else:
-                date_sent += " " + new_wordlist[i]
+                dates_indices.append(i)
                 if number_flag_list[i]==1 or new_wordlist[i] in MONTH_WORDS:
                     state = "MONTH"
+            else:
+                state = "START"
         elif state == "MONTH":
             if number_flag_list[i]==0 and not new_wordlist[i] in DATE_FILL_WORDS:
                 date_sentences.append(date_sent)
+                for d_i in dates_indices:
+                    dates_flags_list[d_i] = 1
                 state = "START"
             else:
                 date_sent += " " + new_wordlist[i]
+                dates_indices.append(i)
                 if number_flag_list[i]==1:
-                    if text2number(new_wordlist[i]) > 1900:
+                    if text2number(new_wordlist[i]) >= 1900 and text2number(new_wordlist[i]) <= 2030:
                         date_sentences.append(date_sent)
-                        state = "START"
-                    else:
-                        state = "REPEATED NUMS"
+                        for d_i in dates_indices:
+                            dates_flags_list[d_i] = 1
+                    state = "START"
+                    # else:
+                    #     state = "REPEATED NUMS"
         elif state == "YEAR":
             if number_flag_list[i]==0: 
+                for d_i in dates_indices:
+                    dates_flags_list[d_i] = 1
                 date_sentences.append(date_sent)
-                state == "START"
-            else:
-                repeated_num_sent = date_sent + " " + new_wordlist[i]
-                state = "REPEATED NUMS"
-        elif state == "REPEATED NUMS":
-            if repeated_num_sent == "": repeated_num_sent = date_sent
-            date_sent = ""
-            if number_flag_list[i]==0: 
-                if not all(s.isnumeric() for s in repeated_num_sent.split()):
-                    repeated_nums.append(repeated_num_sent)
-                    repeated_nums_flag = 1
-                state = "START"
-            else:
-                repeated_num_sent += " " + new_wordlist[i]
+            state == "START"
+            # else:
+            #     repeated_num_sent = date_sent + " " + new_wordlist[i]
+            #     state = "REPEATED NUMS"
+        # elif state == "REPEATED NUMS":
+        #     if repeated_num_sent == "": repeated_num_sent = date_sent
+        #     date_sent = ""
+        #     if number_flag_list[i]==0: 
+        #         if not all(s.isnumeric() for s in repeated_num_sent.split()):
+        #             repeated_nums.append(repeated_num_sent)
+        #             repeated_nums_flag = 1
+        #         state = "START"
+        #     else:
+        #         repeated_num_sent += " " + new_wordlist[i]
     else:
         if state == "MONTH" or state == "YEAR":
             date_sentences.append(date_sent)
-        if state == "DAY":
-            repeated_nums.append(date_sent)
-            repeated_nums_flag = 1
-        if state == "REPEATED NUMS":
-            if repeated_num_sent == "": repeated_num_sent = date_sent
-            repeated_nums.append(repeated_num_sent)
-            repeated_nums_flag = 1
-    return date_sentences, repeated_nums_flag, repeated_nums
+            for d_i in dates_indices:
+                dates_flags_list[d_i] = 1
+        # if state == "DAY":
+        #     pass
+            # repeated_nums.append(date_sent)
+            # repeated_nums_flag = 1
+        # if state == "REPEATED NUMS":
+        #     if repeated_num_sent == "": repeated_num_sent = date_sent
+        #     repeated_nums.append(repeated_num_sent)
+        #     repeated_nums_flag = 1
+    return date_sentences, dates_flags_list
+    # return date_sentences, dates_flags_list
 
     
 def extract_date(text, wordlist):

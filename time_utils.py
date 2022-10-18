@@ -37,12 +37,13 @@ def extract_time(text, wordlist):
     return hours, minutes
 
 
-def get_time(new_wordlist, number_flag_list, special_session_flag_list):
+def get_time(new_wordlist, number_flag_list):
     state = "START"
     time_sentences = []
     time_sent = ""
+    times_flags_list = [0] * len(new_wordlist)
     for i in range(len(new_wordlist)):
-        if special_session_flag_list[i] == 1: continue
+        # if special_session_flag_list[i] == 1: continue
         # print(i)
         # print(state)
         # print(text2number(new_wordlist[i]))
@@ -51,40 +52,58 @@ def get_time(new_wordlist, number_flag_list, special_session_flag_list):
         if new_wordlist[i] in TIME_TRIGGERS:
             state = "TIME TRIGGERED"
         elif state == "TIME TRIGGERED":
+            times_indices = []
             time_sent = ""
             # if text2number(new_wordlist[i]) <= 24 and text2number(new_wordlist[i]) > 0:
             if text2number(new_wordlist[i]) <= 60 and text2number(new_wordlist[i]) > 0:
                 time_sent += new_wordlist[i]
+                times_indices.append(i)
                 state = "HOUR"
             else:
                 state = "START"
         elif state == "HOUR":
             if new_wordlist[i] in TIME_TERMINATING:
                 time_sent += " " + new_wordlist[i]
+                times_indices.append(i)
                 if i+1 < len(number_flag_list) and number_flag_list[i+1] == 0:
                     time_sentences.append(time_sent)
+                    for t_i in times_indices:
+                        times_flags_list[t_i] = 1
                     state = "START"
                 elif i+1 < len(number_flag_list) and number_flag_list[i+1] == 1 and new_wordlist[i+1].startswith('و') and text2number(new_wordlist[i+1]) > 0 and text2number(new_wordlist[i+1]) < 60:
                     time_sent += " " + new_wordlist[i]
+                    times_indices.append(i)
                     state = "MINUTE"
                 elif i+1 < len(number_flag_list) and new_wordlist[i+1].startswith('و') and new_wordlist[i+1][1:] in TIME_FRACTIONS.keys():
                     time_sent += " " + new_wordlist[i]
+                    times_indices.append(i)
                     state = "MINUTE"
             elif (number_flag_list[i] == 1 and text2number(new_wordlist[i]) > 0 and text2number(new_wordlist[i]) < 60) or new_wordlist[i][1:] in TIME_FRACTIONS.keys():
                 time_sent += " " + new_wordlist[i]
+                times_indices.append(i)
                 state = "MINUTE"
             elif i+1 < len(number_flag_list) and number_flag_list[i+1] == 0:
                 time_sentences.append(time_sent)
+                for t_i in times_indices:
+                    times_flags_list[t_i] = 1
                 state = "START"
         elif state == "MINUTE":
             if new_wordlist[i] in TIME_TERMINATING:
                 time_sent += " " + new_wordlist[i]
+                times_indices.append(i)
                 time_sentences.append(time_sent)
+                for t_i in times_indices:
+                    times_flags_list[t_i] = 1
                 state = "START"
             elif number_flag_list[i] == 0 and not new_wordlist[i][1:] in TIME_FRACTIONS.keys():
                 time_sentences.append(time_sent)
+                for t_i in times_indices:
+                    times_flags_list[t_i] = 1
                 state = "START"
     else:
         if state == "HOUR" or state == "MINUTE":
             time_sentences.append(time_sent)
-    return time_sentences
+            for t_i in times_indices:
+                times_flags_list[t_i] = 1
+            
+    return time_sentences, times_flags_list

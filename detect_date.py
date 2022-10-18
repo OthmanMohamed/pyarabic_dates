@@ -1,12 +1,10 @@
-from date_utils import prepare_txt, get_separate_numbers, extract_date, get_dates, extract_repeated_numbers, get_special_sessions_number
+from date_utils import prepare_txt, get_separate_numbers, extract_date, get_dates, extract_repeated_numbers, get_special_sessions_number, get_repeated_nums
 from time_utils import get_time, extract_time
 from herz_utils import get_herz, extract_herz
 from number import detect_number_phrases_position, text2number
-import araby
+import araby 
 from dates_const import DATE_FILL_WORDS, MONTH_WORDS, DAY_DEFINING_WORDS
-import os  
 import re
-import sys
 
 def add_pattern_brackets(original_txt, pattern, index):
     split_txt = original_txt.split()
@@ -22,12 +20,17 @@ def process_dates(txt):
     txt, wordlist = prepare_txt(txt)
     brack_txt = txt
     _, new_wordlist, number_flag_list = get_separate_numbers(wordlist)
-    sessions_sentences, special_session_flag_list = get_special_sessions_number(new_wordlist, number_flag_list)
+    # sessions_sentences, special_session_flag_list = get_special_sessions_number(new_wordlist, number_flag_list)
     #TO BE REMOVED, BUT NEED FIRST TO HANDLE CASES LIKE 'تم فتح المحضر ثلاثة عشر (13) من يناير عام الفين اثنان وعشرين (2022)'
-    special_session_flag_list = [0] * len(number_flag_list)
-    date_sentences, repeated_nums_flag, repeated_nums = get_dates(new_wordlist, number_flag_list, special_session_flag_list)
-    time_sentences = get_time(new_wordlist, number_flag_list, special_session_flag_list)
-    herz_sentences = get_herz(new_wordlist, number_flag_list, special_session_flag_list)
+    # special_session_flag_list = [0] * len(number_flag_list)
+    # date_sentences, dates_flags_list = get_dates(new_wordlist, number_flag_list, special_session_flag_list)
+    # repeated_nums, repeated_nums_flag = get_repeated_nums(new_wordlist, number_flag_list, dates_flags_list)
+    # time_sentences = get_time(new_wordlist, number_flag_list, special_session_flag_list)
+    # herz_sentences = get_herz(new_wordlist, number_flag_list, special_session_flag_list)
+    date_sentences, dates_flags_list = get_dates(new_wordlist, number_flag_list)
+    time_sentences, times_flags_list = get_time(new_wordlist, number_flag_list)
+    herz_sentences = get_herz(new_wordlist, number_flag_list)
+    repeated_nums, repeated_nums_flag = get_repeated_nums(new_wordlist, number_flag_list, dates_flags_list, times_flags_list)
 
     if date_sentences == ['']: date_sentences = []
     if time_sentences == ['']: time_sentences = []
@@ -48,8 +51,9 @@ def process_dates(txt):
                     while j<len(txt.split()) and j-i < len(h.split()):
                         if txt.split()[j] != h.split()[j-i]: flag = 0
                         j += 1
-                    if flag == 1: end_pattern_index = i + len(h.split())
-                    break
+                        if flag == 1: 
+                            end_pattern_index = i + len(h.split())
+                            break
         brack_txt = add_pattern_brackets(brack_txt, herz_sent, end_pattern_index)
         txt = add_pattern_brackets(txt, herz_sent, end_pattern_index)
     
@@ -119,14 +123,15 @@ def process_dates(txt):
         if any(r in string for string in time_sentences): continue
         end_pattern_index = -1
         for i, w in enumerate(txt.split()):
-                if w == r.split()[0]:
+                if w == r.split()[0]:      
                     flag = 1
                     j = i
                     while j<len(txt.split()) and j-i < len(r.split()):
                         if txt.split()[j] != r.split()[j-i]: flag = 0
                         j += 1
-                    if flag == 1: end_pattern_index = i + len(r.split())
-                    break
+                    if flag == 1: 
+                        end_pattern_index = i + len(r.split())
+                        break
         new_r, r_wordlist = prepare_txt(r)
         num = extract_repeated_numbers(new_r, r_wordlist)
         if end_pattern_index >= 0: brack_txt = add_pattern_brackets(brack_txt, num, end_pattern_index)
@@ -146,12 +151,13 @@ def main():
 
     # txts.append("الصحيفة رقم مية اربعة وسبعين (174) من يوم اتنين عشرة عشرين عشرين (2020)")
     txts.append("الجلسة الثالثه يوم تسعه وعشرين اتناشر الفين واحد وعشرين")
+    # txts.append("الجلسة تسعه وعشرين اتناشر الفين واحد وعشرين")
     # txts.append("في الساعه إحدى عشره صباحا وثلاثين دقيقه فتح المحضر")
     # txts.append("من يوم الثاني عشرة عشرين عشرين ")
 
     # txts.append( "  قبل اتنين وعشرين تسعة الفين وعشرة الساعة تمانية ونص مساء وحوالي تلات تيام تاريخ العاشر من يونيو عشرين واحد و عشرين الساعة العاشرة وخمس دقائق" )
     # txts.append("يوم الخميس الساعة خمسة وتلاتين دقيقة الساعة اتنين وعشرين دقيقة الحرز رقم ميتين وستاشر على اتناشر أأشياء قسم الاقصر")
-    # txts.append( "رقم القيد خمسمية سبعة وسبعين الف ستمية اتنين وخمسين " )
+    # txts.append( "يوم التلات تلاتاشر واحد" )
     # txts.append( "المبلغ المالي اتناشر الف جنيه محل الحرز مئتين وثلاثة على خمسمية اتنين وتلاتين" )
     # txts.append("المؤرخ في تلاتة وعشرين ستة الفين واحد وعشرين ورقم صادر عشرين واحد وعشرين اربعتاشر سبعة واحد صفر صفر صفر حداشر واحد وستين المكون من اتنين صفحات ")
 
