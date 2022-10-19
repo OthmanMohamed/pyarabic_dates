@@ -20,14 +20,15 @@ def process_dates(txt):
     txt, original_txt, wordlist, original_wordlist = prepare_txt(txt)
     # brack_txt = txt
     _, new_wordlist, new_original_wordlist, number_flag_list = get_separate_numbers(wordlist, original_wordlist)
-    # sessions_sentences, special_session_flag_list = get_special_sessions_number(new_wordlist, number_flag_list)
+    date_sentences, dates_flags_list = get_dates(new_wordlist, number_flag_list, [0] * len(new_wordlist))
+    sessions_sentences, special_session_flag_list = get_special_sessions_number(new_wordlist, number_flag_list, dates_flags_list)
     #TO BE REMOVED, BUT NEED FIRST TO HANDLE CASES LIKE 'تم فتح المحضر ثلاثة عشر (13) من يناير عام الفين اثنان وعشرين (2022)'
     # special_session_flag_list = [0] * len(number_flag_list)
-    # date_sentences, dates_flags_list = get_dates(new_wordlist, number_flag_list, special_session_flag_list)
+    date_sentences, dates_flags_list = get_dates(new_wordlist, number_flag_list, special_session_flag_list)
     # repeated_nums, repeated_nums_flag = get_repeated_nums(new_wordlist, number_flag_list, dates_flags_list)
     # time_sentences = get_time(new_wordlist, number_flag_list, special_session_flag_list)
     # herz_sentences = get_herz(new_wordlist, number_flag_list, special_session_flag_list)
-    date_sentences, dates_flags_list = get_dates(new_wordlist, number_flag_list)
+    # date_sentences, dates_flags_list = get_dates(new_wordlist, number_flag_list)
     time_sentences, times_flags_list = get_time(new_wordlist, number_flag_list)
     herz_sentences = get_herz(new_wordlist, number_flag_list)
     repeated_nums, repeated_nums_flag = get_repeated_nums(new_wordlist, number_flag_list, dates_flags_list, times_flags_list)
@@ -158,8 +159,9 @@ def main():
 
     # txts.append("الصحيفة رقم مية اربعة وسبعين (174) من يوم اتنين عشرة عشرين عشرين (2020)")
     # txts.append("الجلسة الثالثه يوم تسعه وعشرين اتناشر الفين واحد وعشرين")
-    txts.append("بطاقة تحقيق شخصية رقم اتنين تمانية سبعة صفر واحد اتنين تسعة اتنين سبعة صفر صفر صفر تلاتة واحد")
+    # txts.append("بطاقة تحقيق شخصية رقم اتنين تمانية سبعة صفر واحد اتنين تسعة1 اتنين سبعة صفر صفر صفر تلاتة واحد")
     # txts.append("الجلسة تسعه وعشرين اتناشر الفين واحد وعشرين")
+    txts.append("الجلسة الثالثة تمانيه تسعة عشرين عشرين")
     # txts.append("في الساعه إحدى عشره صباحا وثلاثين دقيقه فتح المحضر")
     # txts.append("من يوم الثاني عشرة عشرين عشرين ")
 

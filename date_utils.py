@@ -135,7 +135,7 @@ def get_separate_numbers(wordlist, original_wordlist):
             flags_list.append(0)
     return separate_numbers, new_wordlist, new_original_wordlist, flags_list
 
-def get_special_sessions_number(new_wordlist, number_flag_list):
+def get_special_sessions_number(new_wordlist, number_flag_list, dates_flags_list):
     sessions_sentences = []
     flags_list = []
     i = 0
@@ -144,11 +144,12 @@ def get_special_sessions_number(new_wordlist, number_flag_list):
             session_sent = new_wordlist[i]
             flags_list.append(1)
             special_session_flag = 0
-            while i+1 < len(new_wordlist) and number_flag_list[i+1] == 1:
+            while i+1 < len(new_wordlist) and number_flag_list[i+1] == 1 and dates_flags_list[i+1]==0:
                 flags_list.append(1)
                 special_session_flag = 1
                 session_sent += " " + new_wordlist[i+1]
                 i += 1
+                break
             if special_session_flag: sessions_sentences.append(session_sent)
         else:
             flags_list.append(0)
@@ -175,11 +176,12 @@ def get_repeated_nums(new_wordlist, number_flag_list, dates_flags_list, times_fl
     return repeated_nums, repeated_nums_flag
 
 
-def get_dates(new_wordlist, number_flag_list):
+def get_dates(new_wordlist, number_flag_list, special_session_flag_list):
     state = "START"
     date_sentences = []
     dates_flags_list = [0] * len(new_wordlist)
     for i in range(len(new_wordlist)):
+        if special_session_flag_list[i] == 1: continue
         if state == "START":
             # if repeated_nums_flag and not repeated_num_sent == "":
             #     repeated_nums.append(repeated_num_sent)
