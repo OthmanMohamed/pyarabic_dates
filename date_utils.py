@@ -226,9 +226,9 @@ def get_dates(new_wordlist, number_flag_list, special_session_flag_list):
                 state = "START"
         elif state == "MONTH":
             if number_flag_list[i]==0 and not new_wordlist[i] in DATE_FILL_WORDS:
-                date_sentences.append(date_sent)
-                for d_i in dates_indices:
-                    dates_flags_list[d_i] = 1
+                # date_sentences.append(date_sent)
+                # for d_i in dates_indices:
+                #     dates_flags_list[d_i] = 1
                 state = "START"
             else:
                 date_sent += " " + new_wordlist[i]
