@@ -48,7 +48,7 @@ def extract_herz(text, wordlist):
     txt = ""
     if any(s in text for s in separators):
         txt = text
-        separate_numbers, *_ = get_separate_numbers(wordlist)
+        separate_numbers, *_ = get_separate_numbers(wordlist, wordlist)
         for num in separate_numbers:
             txt = txt.replace(num, str(text2number(num)))
         for s in separators:

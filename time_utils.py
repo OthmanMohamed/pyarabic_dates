@@ -15,7 +15,7 @@ def extract_time(text, wordlist):
                 minutes = text2number(TIME_FRACTIONS[w])
             elif (w.startswith('و') and w[1:] in TIME_FRACTIONS.keys()):
                 minutes = text2number(TIME_FRACTIONS[w[1:]])
-    separate_numbers, *_ = get_separate_numbers(wordlist)
+    separate_numbers, *_ = get_separate_numbers(wordlist, wordlist)
     num_phrases = separate_numbers
     for n in num_phrases:
         nn = text2number(n)

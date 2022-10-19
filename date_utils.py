@@ -10,6 +10,7 @@ import re
 def prepare_txt(txt):
     # REPLACE و WITH SPACES
     txt = txt.replace(u' و ', u' و')
+    original_txt = txt
     # Normalize Letters
     txt = txt.replace(u'أ', u'ا')
     txt = txt.replace(u'إ', u'ا')
@@ -26,6 +27,7 @@ def prepare_txt(txt):
     # TOKENIZE
     # wordlist = araby.tokenize(txt)
     wordlist = txt.split()
+    original_wordlist = original_txt.split()
     # REPLACE ORDINALS WITH NUMBER WORDS
     # inv_UNITS_ORDINAL_WORDS = {v: k for k, v in UNITS_ORDINAL_WORDS.items()}
     # inv_UNITS_ORDINAL_WORDS_FEMININ = {v: k for k, v in UNITS_ORDINAL_WORDS_FEMININ.items()}
@@ -44,10 +46,10 @@ def prepare_txt(txt):
         elif word.startswith(u'ال') and word[2:] in inv_UNITS_ORDINAL_WORDS_FEMININ:
             # REPLACE ORDINALS CONTAINING ال
             wordlist[i] = inv_UNITS_ORDINAL_WORDS_FEMININ[word[2:]]
-        txt = txt + " " + wordlist[i]
+        txt = txt + " " + wordlist[i] if i!=0 else txt + wordlist[i]
     # txt = txt.replace(u' )', u')')
     # txt = txt.replace(u'( ', u'(')
-    return txt, wordlist
+    return txt, original_txt, wordlist, original_wordlist
 
 
 def is_complication(word):
@@ -61,34 +63,44 @@ def is_complication(word):
     return is_comp
 
 
-def get_separate_numbers(wordlist):
+def get_separate_numbers(wordlist, original_wordlist):
     num_phrases_pos = detect_number_phrases_position(wordlist)
     # print(wordlist, num_phrases_pos)
     separate_numbers = []
     new_wordlist = []
+    new_original_wordlist = []
     j=0
     for slice in num_phrases_pos:
         while j<slice[0]:
             new_wordlist.append(wordlist[j])
+            new_original_wordlist.append(original_wordlist[j])
             j+=1
         j = slice[1] + 1
         temp_word = ""
+        temp_original_word = ""
         for i in range(slice[0], slice[1]+1):
             # print("wordlist : ", wordlist)
             # print("wordlist[i] : ", wordlist[i])
             # print("temp_word : ", temp_word)
             # print("new_wordlist : ", new_wordlist, "\n\n\n")
-            if len(temp_word) == 0: temp_word += wordlist[i]
+            if len(temp_word) == 0: 
+                temp_word += wordlist[i]
+                temp_original_word += original_wordlist[i]
             else:
                 if wordlist[i].startswith(u'و') and not wordlist[i].startswith(u'واحد') and (text2number(wordlist[i]) >= 20 and text2number(wordlist[i]) <= 90 and text2number(wordlist[i-1]) < text2number(wordlist[i])):
-                    if wordlist[i-1] != u'واحدة': temp_word += " " + wordlist[i]
+                    if wordlist[i-1] != u'واحدة': 
+                        temp_word += " " + wordlist[i]
+                        temp_original_word += " " + original_wordlist[i]
                     else:
                         separate_numbers.append(temp_word)
                         new_wordlist.append(temp_word)
+                        new_original_wordlist.append(temp_original_word)
                         temp_word = wordlist[i]
+                        temp_original_word = original_wordlist[i]
                 # elif is_complication(wordlist[i-1]) or is_complication(wordlist[i]):
                 elif is_complication(wordlist[i-1]):
                     temp_word += (" " + wordlist[i])
+                    temp_original_word += (" " + original_wordlist[i])
                 elif (wordlist[i] in ACCEPT_NUMBER_PREFIX) and (text2number(wordlist[i]) > text2number(wordlist[i-1])) and (text2number(wordlist[i-1])!=0):
                     if (wordlist[i] == u'عشر' or wordlist[i] == u'عشرة' or wordlist[i] == u'عشره')\
                         and\
@@ -96,17 +108,24 @@ def get_separate_numbers(wordlist):
                         or (i>1 and wordlist[i-2] in DAY_DEFINING_WORDS)) :
                         separate_numbers.append(temp_word)
                         new_wordlist.append(temp_word)
+                        new_original_wordlist.append(temp_original_word)
                         temp_word = wordlist[i]
+                        temp_original_word = original_wordlist[i]
                     else:
                         temp_word += (" " + wordlist[i])
+                        temp_original_word += (" " + original_wordlist[i])
                 else:
                     separate_numbers.append(temp_word)
                     new_wordlist.append(temp_word)
+                    new_original_wordlist.append(temp_original_word)
                     temp_word = wordlist[i]
+                    temp_original_word = original_wordlist[i]
         separate_numbers.append(temp_word)
         new_wordlist.append(temp_word)
+        new_original_wordlist.append(temp_original_word)
     while j<len(wordlist):
         new_wordlist.append(wordlist[j])
+        new_original_wordlist.append(original_wordlist[j])
         j+=1
     flags_list = []
     for w in new_wordlist:
@@ -114,7 +133,7 @@ def get_separate_numbers(wordlist):
             flags_list.append(1)
         else:
             flags_list.append(0)
-    return separate_numbers, new_wordlist, flags_list
+    return separate_numbers, new_wordlist, new_original_wordlist, flags_list
 
 def get_special_sessions_number(new_wordlist, number_flag_list):
     sessions_sentences = []
@@ -262,7 +281,7 @@ def extract_date(text, wordlist):
     month_word_in_txt = 0
     if any(word in text for word in MONTH_WORDS):
         month_word_in_txt = 1
-    separate_numbers, *_ = get_separate_numbers(wordlist)
+    separate_numbers, *_ = get_separate_numbers(wordlist, wordlist)
     num_phrases = separate_numbers
     # print("NUM PHRASES : ", num_phrases)
     month = -1
@@ -309,7 +328,7 @@ def extract_date(text, wordlist):
 
 def extract_repeated_numbers(text, wordlist):
     num = ""
-    num_phrases, *_ = get_separate_numbers(wordlist)
+    num_phrases, *_ = get_separate_numbers(wordlist, wordlist)
     for i, n in enumerate(num_phrases):
         nn = text2number(n)
         if nn == 0 and (n != 'صفر' and n != 'زيرو'): nn = n
