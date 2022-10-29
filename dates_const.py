@@ -139,8 +139,8 @@ DAY_DEFINING_WORDS = [
 TIME_TRIGGERS = [
     "الساعه",
     "الساعة",
-    "تمام",
-    "حوالي"
+    # "حوالي" ,
+    # "تمام"
 ]
 
 TIME_TERMINATING = [

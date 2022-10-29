@@ -5,6 +5,7 @@ from number import detect_number_phrases_position, text2number
 import araby 
 from dates_const import DATE_FILL_WORDS, MONTH_WORDS, DAY_DEFINING_WORDS
 import re
+import sys
 
 def add_pattern_brackets(original_txt, pattern, index):
     split_txt = original_txt.split()
@@ -151,17 +152,19 @@ def process_dates(txt):
 
 def main():
     txts = []
-    # file_path = sys.argv[1]
+    # file_path = "test/nyaba_sample.txt"
+    # # file_path = sys.argv[1]
     # f = open(file_path, encoding='utf-8')
     # t = f.read()
     # f.close()
-    # txts.append(t)
+    # txts.extend(t.split('\n'))
 
-    # txts.append("الصحيفة رقم مية اربعة وسبعين (174) من يوم اتنين عشرة عشرين عشرين (2020)")
+    txts.append("ما معلوماتك بشأن الواقعة محل التحقيق جيم حصل أنا شغال رئيس حفارين بالجبانة الفاطمية بمقام السيد البدوي من حوالي تمانية وعشرين سنة ودي مقابر عامة ومن حوالي تلات أيام بتاريخ تلاتاشر تمانية ألفين واحد وعشرين الساعة اتناشر الضهر")
+    txts.append("ما معلوماتك بشأن الواقعة محل التحقيق جيم حصل أنا شغال رئيس حفارين بالجبانة الفاطمية بمقام السيد البدوي من حوالي تمانية وعشرين سنة ودي مقابر عامة ومن حوالي تلات أيام بتاريخ تلاتاشر تمانية ألفين واحد وعشرين الساعة اتناشر الضهر جاتلي مكالمة من شخص يدعى محمد محمود وقالي انا معايا واحد قريبي متوفي ومحتاجين ندفنه وانا جاي على المقابر جهزلي المدفن لغاية لما اجي وفعلا حوالي الساعه خمسه ونص مساءا في نفس اليوم لقيت جنازة داخلة وكان معاها محمد محمود وكان في ناس من المرة كانو شايلين الجثمان وكانوا بيساعدو في الخير لغاية لما يوصلو لغاية لما جثمان للمدفن لحد ما قولتله على مكان المدفن وابتديت اشتغل زاستلمت الجثمان وكان متكفن ونزلتهم وقفلت وساعتها كان محمد واقف فقولتله فين التصريح قالي هصورهولك على طول وانا ساعتها اشتغل فضلت روحت جنازة تانية وفضلت مستني التصريح بتاع محمد لغاية بليل وكلمته اكتر من مرة ماردش عليا فاستنيت لتاني يوم الصبح روحتله عند مكان شغله سألت عليه وعرفت انه مش موجود فساعتها قلقت روحت على القسم بلغت وده كل اللي حصل")
     # txts.append("الجلسة الثالثه يوم تسعه وعشرين اتناشر الفين واحد وعشرين")
     # txts.append("بطاقة تحقيق شخصية رقم اتنين تمانية سبعة صفر واحد اتنين تسعة1 اتنين سبعة صفر صفر صفر تلاتة واحد")
     # txts.append("الجلسة تسعه وعشرين اتناشر الفين واحد وعشرين")
-    txts.append("فتحت الجلسة الثالثة الخامس من اكتوبر الفين اتنين وعشرين      بسرايا النيابة")
+    # txts.append("فتحت الجلسة الثالثة الخامس من اكتوبر الفين اتنين وعشرين      بسرايا النيابة")
     # txts.append("في الساعه إحدى عشره صباحا وثلاثين دقيقه فتح المحضر")
     # txts.append("من يوم الثاني عشرة عشرين عشرين ")
 
@@ -175,18 +178,24 @@ def main():
         # new_txt, date_flag, year_flag, time_flag, repeated_nums_flag, brack_txt = process_dates(txt)
         new_txt, date_flag, year_flag, time_flag, repeated_nums_flag = process_dates(txt)
         # f = open("test/test_out.txt", 'w', encoding='utf-8')
-        # f.write(brack_txt)
+        # f.write(new_txt)
         # f.close()   
         if 1 or date_flag or time_flag or repeated_nums_flag: print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
         # if 1 or date_flag or time_flag or repeated_nums_flag: print("TXT : " , txt, "\n", "NEW : ", brack_txt, "\n\n\n")
-    # directory = "/data/mahkama"
-    # for filename in os.listdir(directory):
-    #     f = os.path.join(directory, filename)
-    #     if f.endswith(".txt"):
-    #         f_o = open(f, 'r')
-    #         txt = f_o.read()
-    #         new_txt, date_flag, year_flag = process_dates(txt)
-    #         if date_flag : print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
+
+    # final_txts = []
+    # for txt in txts:
+    #     new_txt, date_flag, year_flag, time_flag, repeated_nums_flag = process_dates(txt)
+    #     # f = open("test/test_out.txt", 'w', encoding='utf-8')
+    #     # f.write(brack_txt)
+    #     # f.close()   
+    #     # if 1 or date_flag or time_flag or repeated_nums_flag: print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
+    #     # if 1 or date_flag or time_flag or repeated_nums_flag: print("TXT : " , txt, "\n", "NEW : ", brack_txt, "\n\n\n")
+    #     final_txts.append(new_txt)
+    # # f = open("../test_out.txt", 'w', encoding='utf-8')
+    # f = open("test/test_out.txt", 'w', encoding='utf-8')
+    # f.write('\n'.join(final_txts))
+    # f.close()
 
 
 if __name__ == '__main__':
