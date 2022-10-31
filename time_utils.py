@@ -40,6 +40,7 @@ def extract_time(text, wordlist):
 def get_time(new_wordlist, number_flag_list):
     state = "START"
     time_sentences = []
+    end_indices = []
     time_sent = ""
     times_flags_list = [0] * len(new_wordlist)
     for i in range(len(new_wordlist)):
@@ -67,6 +68,7 @@ def get_time(new_wordlist, number_flag_list):
                 times_indices.append(i)
                 if i+1 < len(number_flag_list) and number_flag_list[i+1] == 0:
                     time_sentences.append(time_sent)
+                    end_indices.append(i)
                     for t_i in times_indices:
                         times_flags_list[t_i] = 1
                     state = "START"
@@ -84,6 +86,7 @@ def get_time(new_wordlist, number_flag_list):
                 state = "MINUTE"
             elif i+1 < len(number_flag_list) and number_flag_list[i+1] == 0:
                 time_sentences.append(time_sent)
+                end_indices.append(i)
                 for t_i in times_indices:
                     times_flags_list[t_i] = 1
                 state = "START"
@@ -92,18 +95,21 @@ def get_time(new_wordlist, number_flag_list):
                 time_sent += " " + new_wordlist[i]
                 times_indices.append(i)
                 time_sentences.append(time_sent)
+                end_indices.append(i-1)
                 for t_i in times_indices:
                     times_flags_list[t_i] = 1
                 state = "START"
             elif number_flag_list[i] == 0 and not new_wordlist[i][1:] in TIME_FRACTIONS.keys():
                 time_sentences.append(time_sent)
+                end_indices.append(i-1)
                 for t_i in times_indices:
                     times_flags_list[t_i] = 1
                 state = "START"
     else:
         if state == "HOUR" or state == "MINUTE":
             time_sentences.append(time_sent)
+            end_indices.append(i-1)
             for t_i in times_indices:
                 times_flags_list[t_i] = 1
             
-    return time_sentences, times_flags_list
+    return time_sentences, times_flags_list, end_indices
