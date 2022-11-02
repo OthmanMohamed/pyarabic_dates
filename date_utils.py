@@ -138,6 +138,7 @@ def get_separate_numbers(wordlist, original_wordlist):
 def get_special_sessions_number(new_wordlist, number_flag_list, dates_flags_list):
     sessions_sentences = []
     flags_list = []
+    end_indices = []
     i = 0
     while i < len(new_wordlist):
         if any(word in new_wordlist[i] for word in SPECIAL_SESSIONS_WORDS):
@@ -150,11 +151,13 @@ def get_special_sessions_number(new_wordlist, number_flag_list, dates_flags_list
                 session_sent += " " + new_wordlist[i+1]
                 i += 1
                 break
-            if special_session_flag: sessions_sentences.append(session_sent)
+            if special_session_flag: 
+                sessions_sentences.append(session_sent)
+                end_indices.append(i)
         else:
             flags_list.append(0)
         i += 1
-    return sessions_sentences, flags_list
+    return sessions_sentences, flags_list, end_indices
 
 def get_repeated_nums(new_wordlist, number_flag_list, dates_flags_list, times_flags_list):
     repeated_num_sent = ""
@@ -162,7 +165,13 @@ def get_repeated_nums(new_wordlist, number_flag_list, dates_flags_list, times_fl
     repeated_nums = []
     end_indices = []
     for i in range(len(new_wordlist)):
-        if dates_flags_list[i] == 1 or times_flags_list[i] == 1: continue
+        if dates_flags_list[i] == 1 or times_flags_list[i] == 1: 
+            if repeated_num_sent != "" and not all(s.isnumeric() for s in repeated_num_sent.split()):
+                repeated_nums.append(repeated_num_sent)
+                end_indices.append(i-1)
+                repeated_nums_flag = 1
+                repeated_num_sent = ""
+            continue
         if number_flag_list[i] == 1:
             repeated_num_sent += " " + new_wordlist[i]
         if number_flag_list[i] == 0 and repeated_num_sent != "": 
@@ -347,6 +356,6 @@ def extract_repeated_numbers(text, wordlist):
 if __name__ == '__main__':
     txt = "رفعت الجلسة يوم سبعتاشر من فبراير عشرين اتنين وعشرين بعد"
     # txt = "17"
-    txt, wordlist = prepare_txt(txt)
+    txt, _, wordlist, _ = prepare_txt(txt)
     day, month, year = extract_date(txt, wordlist)
     print(day, month, year)
