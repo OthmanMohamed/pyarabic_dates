@@ -55,8 +55,8 @@ def get_time(new_wordlist, number_flag_list):
         elif state == "TIME TRIGGERED":
             times_indices = []
             time_sent = ""
-            # if text2number(new_wordlist[i]) <= 24 and text2number(new_wordlist[i]) > 0:
-            if text2number(new_wordlist[i]) <= 60 and text2number(new_wordlist[i]) > 0:
+            if text2number(new_wordlist[i]) <= 24 and text2number(new_wordlist[i]) > 0:
+            # if text2number(new_wordlist[i]) <= 60 and text2number(new_wordlist[i]) > 0:
                 time_sent += new_wordlist[i]
                 times_indices.append(i)
                 state = "HOUR"
@@ -67,6 +67,7 @@ def get_time(new_wordlist, number_flag_list):
                 time_sent += " " + new_wordlist[i]
                 times_indices.append(i)
                 if i+1 < len(number_flag_list) and number_flag_list[i+1] == 0:
+                    
                     time_sentences.append(time_sent)
                     end_indices.append(i)
                     for t_i in times_indices:
@@ -95,13 +96,13 @@ def get_time(new_wordlist, number_flag_list):
                 time_sent += " " + new_wordlist[i]
                 times_indices.append(i)
                 time_sentences.append(time_sent)
-                end_indices.append(i-1)
+                end_indices.append(i)
                 for t_i in times_indices:
                     times_flags_list[t_i] = 1
                 state = "START"
             elif number_flag_list[i] == 0 and not new_wordlist[i][1:] in TIME_FRACTIONS.keys():
                 time_sentences.append(time_sent)
-                end_indices.append(i-1)
+                end_indices.append(i)
                 for t_i in times_indices:
                     times_flags_list[t_i] = 1
                 state = "START"

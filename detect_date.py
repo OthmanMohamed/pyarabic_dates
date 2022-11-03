@@ -76,7 +76,9 @@ def process_dates(txt):
             #             j += 1
             #         if flag == 1: end_pattern_index = i + len(t.split())
             # brack_txt = add_pattern_brackets(brack_txt, f'{int(hours):02d}' + ":" + f'{int(minutes):02d}' , end_pattern_index)
-            new_original_wordlist[end_times_indices[i]] = new_original_wordlist[end_times_indices[i]] + ' (' + f'{int(hours):02d}' + ":" + f'{int(minutes):02d})'
+            brack_pattern = ' (' + f'{int(hours):02d}' + ":" + f'{int(minutes):02d})'
+            if (end_times_indices[i]+1 < len(new_original_wordlist) and new_original_wordlist[end_times_indices[i]+1].strip() != brack_pattern.strip()) or end_times_indices[i]+1 == len(new_original_wordlist):
+                new_original_wordlist[end_times_indices[i]] = new_original_wordlist[end_times_indices[i]] + brack_pattern
             # txt = add_pattern_brackets(txt, f'{int(hours):02d}' + ":" + f'{int(minutes):02d}' , end_pattern_index)
             # original_txt = add_pattern_brackets(original_txt, f'{int(hours):02d}' + ":" + f'{int(minutes):02d}', end_pattern_index)
             # txt = txt.replace(t, f'{int(hours):02d}' + ":" + f'{int(minutes):02d}')
@@ -99,13 +101,17 @@ def process_dates(txt):
             #         if flag == 1: end_pattern_index = i + len(d.split())
             if month != -1 and day != -1:
                 # brack_txt = add_pattern_brackets(brack_txt, str(year) + "/" + str(month) + "/" + str(day), end_pattern_index)
-                new_original_wordlist[end_dates_indices[j]] = new_original_wordlist[end_dates_indices[j]] + ' (' + str(year) + "/" + str(month) + "/" + str(day) + ')'
+                brack_pattern = ' (' + str(year) + "/" + str(month) + "/" + str(day) + ')'
+                if (end_dates_indices[j]+1 < len(new_original_wordlist) and new_original_wordlist[end_dates_indices[j]+1].strip() != brack_pattern.strip()) or end_dates_indices[j]+1 == len(new_original_wordlist):
+                    new_original_wordlist[end_dates_indices[j]] = new_original_wordlist[end_dates_indices[j]] + brack_pattern
                 # txt = add_pattern_brackets(txt, str(year) + "/" + str(month) + "/" + str(day), end_pattern_index)
                 # original_txt = add_pattern_brackets(original_txt, str(year) + "/" + str(month) + "/" + str(day), end_pattern_index)
                 # txt = txt.replace(d, str(year) + "/" + str(month) + "/" + str(day))
             else:
                 # brack_txt = add_pattern_brackets(brack_txt, str(year), end_pattern_index)
-                new_original_wordlist[end_dates_indices[j]] = new_original_wordlist[end_dates_indices[j]] + ' (' + str(year) + ')'
+                brack_pattern = ' (' + str(year) + ')'
+                if (end_dates_indices[j]+1 < len(new_original_wordlist) and new_original_wordlist[end_dates_indices[j]+1].strip() != brack_pattern.strip()) or end_dates_indices[j]+1 == len(new_original_wordlist):
+                    new_original_wordlist[end_dates_indices[j]] = new_original_wordlist[end_dates_indices[j]] + brack_pattern
                 # txt = add_pattern_brackets(txt, str(year), end_pattern_index)
                 # original_txt = add_pattern_brackets(original_txt, str(year), end_pattern_index)
                 # txt = txt.replace(d, str(year))
@@ -146,7 +152,9 @@ def process_dates(txt):
         num = extract_repeated_numbers(new_r, r_wordlist)
         # if end_pattern_index >= 0: brack_txt = add_pattern_brackets(brack_txt, num, end_pattern_index)
         if end_nums_indices[i] >= 0: 
-            new_original_wordlist[end_nums_indices[i]] = new_original_wordlist[end_nums_indices[i]] + ' (' + num + ')'
+            brack_pattern = ' (' + num + ')'
+            if (end_nums_indices[i]+1 < len(new_original_wordlist) and new_original_wordlist[end_nums_indices[i]+1].strip() != brack_pattern.split()) or end_nums_indices[i]+1 == len(new_original_wordlist):
+                new_original_wordlist[end_nums_indices[i]] = new_original_wordlist[end_nums_indices[i]] + brack_pattern
             # txt = add_pattern_brackets(txt, num, end_pattern_index)
             # original_txt = add_pattern_brackets(original_txt, num, end_pattern_index)
             original_txt = ' '.join(new_original_wordlist)
@@ -157,19 +165,19 @@ def process_dates(txt):
 
 def main():
     txts = []
-    file_path = "test/nyaba_sample.txt"
-    # # file_path = sys.argv[1]
-    # f = open(file_path, encoding='utf-8')
-    # t = f.read()
-    # f.close()
-    # txts.extend(t.split('\n'))
+    file_path = "test/hyp_combined.txt"
+    # file_path = sys.argv[1]
+    f = open(file_path, encoding='utf-8')
+    t = f.read()
+    f.close()
+    txts.extend(t.split('\n'))
 
     # txts.append("ما معلوماتك بشأن الواقعة محل التحقيق جيم حصل أنا شغال رئيس حفارين بالجبانة الفاطمية بمقام السيد البدوي من حوالي تمانية وعشرين سنة ودي مقابر عامة ومن حوالي تلات أيام بتاريخ تلاتاشر تمانية ألفين واحد وعشرين الساعة اتناشر الضهر")
     # txts.append("ما معلوماتك بشأن الواقعة محل التحقيق جيم حصل أنا شغال رئيس حفارين بالجبانة الفاطمية بمقام السيد البدوي من حوالي تمانية وعشرين سنة ودي مقابر عامة ومن حوالي تلات أيام بتاريخ تلاتاشر تمانية ألفين واحد وعشرين الساعة اتناشر الضهر جاتلي مكالمة من شخص يدعى محمد محمود وقالي انا معايا واحد قريبي متوفي ومحتاجين ندفنه وانا جاي على المقابر جهزلي المدفن لغاية لما اجي وفعلا حوالي الساعه خمسه ونص مساءا في نفس اليوم لقيت جنازة داخلة وكان معاها محمد محمود وكان في ناس من المرة كانو شايلين الجثمان وكانوا بيساعدو في الخير لغاية لما يوصلو لغاية لما جثمان للمدفن لحد ما قولتله على مكان المدفن وابتديت اشتغل زاستلمت الجثمان وكان متكفن ونزلتهم وقفلت وساعتها كان محمد واقف فقولتله فين التصريح قالي هصورهولك على طول وانا ساعتها اشتغل فضلت روحت جنازة تانية وفضلت مستني التصريح بتاع محمد لغاية بليل وكلمته اكتر من مرة ماردش عليا فاستنيت لتاني يوم الصبح روحتله عند مكان شغله سألت عليه وعرفت انه مش موجود فساعتها قلقت روحت على القسم بلغت وده كل اللي حصل")
     # txts.append("الجلسة الثالثه يوم تسعه وعشرين اتناشر الفين واحد وعشرين")
     # txts.append("بطاقة تحقيق شخصية رقم اتنين تمانية سبعة صفر واحد اتنين تسعة1 اتنين سبعة صفر صفر صفر تلاتة واحد")
     # txts.append("تم فتح الملف الثالث عشر من يناير عام الفين اثنان وعشرين")
-    txts.append("فتحت الجلسة الثالثة الخامس من اكتوبر الفين اتنين وعشرين      بسرايا النيابة")
+    # txts.append("فتحت الجلسة الثالثة الخامس من اكتوبر الفين اتنين وعشرين بسرايا النيابة")
     # txts.append("في الساعه إحدى عشره صباحا وثلاثين دقيقه فتح المحضر")
     # txts.append("من يوم الثاني عشرة عشرين عشرين ")
 
@@ -179,28 +187,28 @@ def main():
     # txts.append( "المبلغ المالي اتناشر الف جنيه محل الحرز مئتين وثلاثة على خمسمية اتنين وتلاتين" )
     # txts.append("المؤرخ في تلاتة وعشرين ستة الفين واحد وعشرين ورقم صادر عشرين واحد وعشرين اربعتاشر سبعة واحد صفر صفر صفر حداشر واحد وستين المكون من اتنين صفحات ")
 
-    for txt in txts:
-        # new_txt, date_flag, year_flag, time_flag, repeated_nums_flag, brack_txt = process_dates(txt)
-        new_txt, date_flag, year_flag, time_flag, repeated_nums_flag = process_dates(txt)
-        # f = open("test/test_out.txt", 'w', encoding='utf-8')
-        # f.write(new_txt)
-        # f.close()   
-        if 1 or date_flag or time_flag or repeated_nums_flag: print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
-        # if 1 or date_flag or time_flag or repeated_nums_flag: print("TXT : " , txt, "\n", "NEW : ", brack_txt, "\n\n\n")
-
-    # final_txts = []
     # for txt in txts:
+    #     # new_txt, date_flag, year_flag, time_flag, repeated_nums_flag, brack_txt = process_dates(txt)
     #     new_txt, date_flag, year_flag, time_flag, repeated_nums_flag = process_dates(txt)
     #     # f = open("test/test_out.txt", 'w', encoding='utf-8')
-    #     # f.write(brack_txt)
+    #     # f.write(new_txt)
     #     # f.close()   
-    #     # if 1 or date_flag or time_flag or repeated_nums_flag: print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
+    #     if 1 or date_flag or time_flag or repeated_nums_flag: print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
     #     # if 1 or date_flag or time_flag or repeated_nums_flag: print("TXT : " , txt, "\n", "NEW : ", brack_txt, "\n\n\n")
-    #     final_txts.append(new_txt)
-    # # f = open("../test_out.txt", 'w', encoding='utf-8')
-    # f = open("test/test_out.txt", 'w', encoding='utf-8')
-    # f.write('\n'.join(final_txts))
-    # f.close()
+
+    final_txts = []
+    for txt in txts:
+        new_txt, date_flag, year_flag, time_flag, repeated_nums_flag = process_dates(txt)
+        # f = open("test/test_out.txt", 'w', encoding='utf-8')
+        # f.write(brack_txt)
+        # f.close()   
+        # if 1 or date_flag or time_flag or repeated_nums_flag: print("TXT : " , txt, "\n", "NEW : ", new_txt, "\n\n\n")
+        # if 1 or date_flag or time_flag or repeated_nums_flag: print("TXT : " , txt, "\n", "NEW : ", brack_txt, "\n\n\n")
+        final_txts.append(new_txt)
+    # f = open("../test_out.txt", 'w', encoding='utf-8')
+    f = open("test/test_out.txt", 'w', encoding='utf-8')
+    f.write('\n'.join(final_txts))
+    f.close()
 
 
 if __name__ == '__main__':
