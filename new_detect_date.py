@@ -102,9 +102,19 @@ def prepare_input(txt):
             temp_t = ""
     return return_txts
 
+def format_chunk(chunk):
+    txts = []
+    txts.extend(chunk.split('\n'))
+    txts = prepare_input(txts)
+    final_txts = []
+    for txt in txts:
+        new_txt, date_flag, year_flag, time_flag = process_dates(txt)
+        final_txts.append(new_txt)
+    return ('\n'.join(final_txts))
+
 def main():
     txts = []
-    file_path = "test/hyp_combined.txt"
+    file_path = "/data/Zenhom_demo_files/demo_files/combined.txt"
     # file_path = sys.argv[1]
     f = open(file_path, encoding='utf-8')
     t = f.read()
