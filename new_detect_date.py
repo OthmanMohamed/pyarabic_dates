@@ -1,4 +1,4 @@
-from date_utils import prepare_txt, get_separate_numbers, extract_date, get_dates, extract_repeated_numbers, get_special_sessions_number, get_repeated_nums
+from date_utils import get_separate_repeated_numbers, prepare_txt, get_separate_numbers, extract_date, get_dates, extract_repeated_numbers, get_special_sessions_number, get_repeated_nums
 from time_utils import get_time, extract_time
 from herz_utils import get_herz, extract_herz
 from number import detect_number_phrases_position, text2number
@@ -26,10 +26,11 @@ def process_dates(txt):
     time_sentences, times_flags_list, end_times_indices = get_time(new_wordlist, number_flag_list)
     # herz_sentences = get_herz(new_wordlist, number_flag_list)
     # repeated_nums, repeated_nums_flag, end_nums_indices = get_repeated_nums(new_wordlist, number_flag_list, dates_flags_list, times_flags_list)
+    repeated_nums, repeated_nums_flag, end_nums_indices = get_separate_repeated_numbers(new_wordlist, number_flag_list)
 
     if date_sentences == ['']: date_sentences = []  
     if time_sentences == ['']: time_sentences = []
-    # if repeated_nums  == ['']: repeated_nums = []
+    if repeated_nums  == ['']: repeated_nums = []
     # if herz_sentences == ['']: herz_sentences = []
     date_flag = 0
     time_flag = 0
@@ -78,6 +79,17 @@ def process_dates(txt):
         #         txt = add_pattern_brackets(txt, str(month) + "/" + str(day), end_pattern_index)
         #         original_txt = add_pattern_brackets(original_txt, str(month) + "/" + str(day), end_pattern_index)
         #         date_flag = 1
+
+    for i, r in enumerate(repeated_nums):
+        if r == '': continue
+        if any(r in string for string in time_sentences): continue
+        new_r, _, r_wordlist, _ = prepare_txt(r)
+        num = extract_repeated_numbers(new_r, r_wordlist)
+        if end_nums_indices[i] >= 0: 
+            brack_pattern = ' (' + num + ')'
+            if (end_nums_indices[i]+1 < len(new_original_wordlist) and new_original_wordlist[end_nums_indices[i]+1].strip() != brack_pattern.split()) or end_nums_indices[i]+1 == len(new_original_wordlist):
+                new_original_wordlist[end_nums_indices[i]] = new_original_wordlist[end_nums_indices[i]] + brack_pattern
+            # original_txt = ' '.join(new_original_wordlist)
     
     original_txt = ' '.join(new_original_wordlist)
     return original_txt, date_flag, year_flag, time_flag
@@ -120,11 +132,15 @@ def main():
     t = f.read()
     f.close()
     txts.extend(t.split('\n'))
+    # txts = ['الساعة خمسة ونص ثم الساعة ستة وخمستاشر دقيقة ثم كان الساعه اتناشر وبعدين الساعة تمانية واربعة وخمسين دقيقة ثم كان الساعة عشرة الا عشرة وكمان الساعة اتنين وعشرين دقيقة والساعة خمسة واربعين دقيقة وبعدين الساعة تمانية الا ربع الساعه سبعه و تلت']
+    # txts = ['حضر الاستاذ محمد عيد عن المدعي بتوكيل رقم الف تلتمية تمانية وتسعين الف عشرين اتنين وعشرين ']
+    # txts = ['كان عندي في خمسة وعشرين اتناشر عشرين عشرين وبعدين حداشر تمانية الفين وعشرة']
     txts = prepare_input(txts)
 
     final_txts = []
     for txt in txts:
         new_txt, date_flag, year_flag, time_flag = process_dates(txt)
+        print(new_txt)
         final_txts.append(new_txt)
     f = open("test/test_out.txt", 'w', encoding='utf-8')
     f.write('\n'.join(final_txts))

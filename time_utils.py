@@ -1,3 +1,4 @@
+from xxlimited import new
 from dates_const import TIME_TRIGGERS, TIME_TERMINATING
 from number_const import TIME_FRACTIONS
 from number import text2number
@@ -6,8 +7,11 @@ from date_utils import get_separate_numbers
 def extract_time(text, wordlist):
     hours = -1
     minutes = -1
+    minus_flag = 0
+    if u' الا ' in text or u' إلا ' in text or u' ألا ' in text:
+        minus_flag = 1
     fraction_in_txt = 0
-    if any(word in text for word in TIME_FRACTIONS):
+    if any(word in text for word in TIME_FRACTIONS.keys()):
         fraction_in_txt = 1
     if fraction_in_txt:
         for i, w in enumerate(wordlist):
@@ -17,14 +21,16 @@ def extract_time(text, wordlist):
                 minutes = text2number(TIME_FRACTIONS[w[1:]])
     separate_numbers, *_ = get_separate_numbers(wordlist, wordlist)
     num_phrases = separate_numbers
+    telt_flag = 0
     for n in num_phrases:
+        if n == u'تلت': telt_flag = 1
         nn = text2number(n)
         if nn==0: nn = n
         if hours == -1:
             hours = nn
         elif minutes == -1:
             minutes = nn
-        else:
+        elif telt_flag==0:
             minutes = int(minutes) + int(nn)
     else:
         if minutes == -1: 
@@ -34,6 +40,9 @@ def extract_time(text, wordlist):
                 minutes = combined - hours
             else:
                 minutes = 0
+    if minus_flag: 
+        hours -= 1
+        minutes = 60 - minutes
     return hours, minutes
 
 
@@ -81,13 +90,19 @@ def get_time(new_wordlist, number_flag_list):
                     time_sent += " " + new_wordlist[i]
                     times_indices.append(i)
                     state = "MINUTE"
-            elif (number_flag_list[i] == 1 and text2number(new_wordlist[i]) > 0 and text2number(new_wordlist[i]) < 60) or new_wordlist[i][1:] in TIME_FRACTIONS.keys():
+            elif new_wordlist[i] == u'الا':
+                if i+1 < len(number_flag_list) and (number_flag_list[i+1] == 1 or new_wordlist[i+1] in TIME_FRACTIONS.keys()):
+                    time_sent += " " + new_wordlist[i]
+                    times_indices.append(i)
+                else:
+                    state = "START"
+            elif (number_flag_list[i] == 1 and text2number(new_wordlist[i]) > 0 and text2number(new_wordlist[i]) < 60) or new_wordlist[i] in TIME_FRACTIONS.keys() or new_wordlist[i][1:] in TIME_FRACTIONS.keys():
                 time_sent += " " + new_wordlist[i]
                 times_indices.append(i)
                 state = "MINUTE"
             elif i+1 < len(number_flag_list) and number_flag_list[i+1] == 0:
                 time_sentences.append(time_sent)
-                end_indices.append(i)
+                end_indices.append(i-1)
                 for t_i in times_indices:
                     times_flags_list[t_i] = 1
                 state = "START"
@@ -102,7 +117,7 @@ def get_time(new_wordlist, number_flag_list):
                 state = "START"
             elif number_flag_list[i] == 0 and not new_wordlist[i][1:] in TIME_FRACTIONS.keys():
                 time_sentences.append(time_sent)
-                end_indices.append(i)
+                end_indices.append(i-1)
                 for t_i in times_indices:
                     times_flags_list[t_i] = 1
                 state = "START"

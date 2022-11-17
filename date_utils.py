@@ -1,10 +1,11 @@
 # from sympy import N
+from os import stat
 from number import extract_number_phrases
 from number import detect_number_phrases_position
 from number import text2number
 from number_const import UNITS_ORDINAL_WORDS, UNITS_ORDINAL_WORDS_FEMININ, inv_UNITS_ORDINAL_WORDS_FEMININ, inv_UNITS_ORDINAL_WORDS
 from dates_const import ACCEPT_NUMBER_PREFIX, MONTH_WORDS, YEARS_REPLACE, SPECIAL_SESSIONS_WORDS
-from dates_const import DATE_FILL_WORDS, DAY_DEFINING_WORDS, TEN_PREFIX
+from dates_const import DATE_FILL_WORDS, DAY_DEFINING_WORDS, TEN_PREFIX, DATE_TRIGGERS
 import re
 
 def prepare_txt(txt):
@@ -187,6 +188,32 @@ def get_repeated_nums(new_wordlist, number_flag_list, dates_flags_list, times_fl
             repeated_nums_flag = 1
     return repeated_nums, repeated_nums_flag, end_indices
 
+def get_separate_repeated_numbers(new_wordlist, number_flag_list):
+    state = "START"
+    repeated_num_sentences = []
+    end_indices = []
+    repeated_num_flags_list = [0] * len(new_wordlist)
+    repeated_num_sent = ""
+    for i in range(len(new_wordlist)):
+        if state == "START":
+            repeated_num_sent = ""
+            if u'رقم' in new_wordlist[i] and i+1<len(new_wordlist) and number_flag_list[i+1] == 1:
+                state = "TRIGGERED"
+        elif state == "TRIGGERED":
+            if number_flag_list[i] == 1:
+                repeated_num_flags_list[i] = 1
+                repeated_num_sent += " " + new_wordlist[i]
+            elif repeated_num_sent:
+                repeated_num_sentences.append(repeated_num_sent)
+                end_indices.append(i-1)
+                state = "START"
+    else:
+        if repeated_num_sent:
+            repeated_num_sentences.append(repeated_num_sent)
+            end_indices.append(i-1)
+    return repeated_num_sentences, repeated_num_flags_list, end_indices
+
+
 
 def get_dates(new_wordlist, number_flag_list, special_session_flag_list):
     state = "START"
@@ -196,6 +223,9 @@ def get_dates(new_wordlist, number_flag_list, special_session_flag_list):
     for i in range(len(new_wordlist)):
         if special_session_flag_list[i] == 1: continue
         if state == "START":
+            if new_wordlist[i] in DATE_TRIGGERS:
+                state = "TRIGGERED"
+        elif state == "TRIGGERED":
             # if repeated_nums_flag and not repeated_num_sent == "":
             #     repeated_nums.append(repeated_num_sent)
             # if special_session_flag_list[i] == 1:
@@ -217,6 +247,7 @@ def get_dates(new_wordlist, number_flag_list, special_session_flag_list):
                         date_sent += new_wordlist[i]
                         dates_indices.append(i)
                         state = "DAY"
+            if state != "DAY": state = "START"
                 # else:
                 #     repeated_num_sent += new_wordlist[i]
                 #     state = "REPEATED NUMS"

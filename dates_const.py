@@ -139,6 +139,13 @@ DAY_DEFINING_WORDS = [
     "في"
 ]
 
+DATE_TRIGGERS = [
+    "تاريخ",
+    "الموافق",
+    "في",
+    "يوم"
+]
+
 TIME_TRIGGERS = [
     "الساعه",
     "الساعة",
