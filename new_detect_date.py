@@ -2,7 +2,7 @@ from date_utils import get_separate_repeated_numbers, prepare_txt, get_separate_
 from time_utils import get_time, extract_time
 from herz_utils import get_herz, extract_herz
 from number import detect_number_phrases_position, text2number
-import araby 
+import araby
 from dates_const import DATE_FILL_WORDS, MONTH_WORDS, DAY_DEFINING_WORDS
 import re
 import sys
@@ -27,6 +27,9 @@ def process_dates(txt):
     # herz_sentences = get_herz(new_wordlist, number_flag_list)
     # repeated_nums, repeated_nums_flag, end_nums_indices = get_repeated_nums(new_wordlist, number_flag_list, dates_flags_list, times_flags_list)
     repeated_nums, repeated_nums_flag, end_nums_indices = get_separate_repeated_numbers(new_wordlist, number_flag_list)
+
+    #TO BE REMOVED
+    time_sentences = ['']
 
     if date_sentences == ['']: date_sentences = []  
     if time_sentences == ['']: time_sentences = []
@@ -63,7 +66,11 @@ def process_dates(txt):
                 brack_pattern = ' (' + str(year) + ')'
                 if (end_dates_indices[j]+1 < len(new_original_wordlist) and new_original_wordlist[end_dates_indices[j]+1].strip() != brack_pattern.strip()) or end_dates_indices[j]+1 == len(new_original_wordlist):
                     new_original_wordlist[end_dates_indices[j]] = new_original_wordlist[end_dates_indices[j]] + brack_pattern
-        # elif day != -1 and month != -1:
+        elif day != -1 and month != -1:
+            date_flag = 1
+            brack_pattern = ' (' + str(month) + "/" + str(day) + ')'
+            if (end_dates_indices[j]+1 < len(new_original_wordlist) and new_original_wordlist[end_dates_indices[j]+1].strip() != brack_pattern.strip()) or end_dates_indices[j]+1 == len(new_original_wordlist):
+                new_original_wordlist[end_dates_indices[j]] = new_original_wordlist[end_dates_indices[j]] + brack_pattern
         #     index = txt.find(d)
         #     for i, w in enumerate(txt.split()):
         #         if w == d.split()[0]:
@@ -126,15 +133,19 @@ def format_chunk(chunk):
 
 def main():
     txts = []
-    file_path = "/data/Zenhom_demo_files/demo_files/combined.txt"
+    file_path = "/data/detect_dates/pyarabic_dates/test/nyaba_sample.txt"
+    # file_path = "/data/detect_dates/pyarabic_dates/test/dummy_test.txt"
+    # file_path = "/data/Zenhom_demo_files/demo_files/combined.txt"
     # file_path = sys.argv[1]
     f = open(file_path, encoding='utf-8')
     t = f.read()
     f.close()
     txts.extend(t.split('\n'))
-    # txts = ['الساعة خمسة ونص ثم الساعة ستة وخمستاشر دقيقة ثم كان الساعه اتناشر وبعدين الساعة تمانية واربعة وخمسين دقيقة ثم كان الساعة عشرة الا عشرة وكمان الساعة اتنين وعشرين دقيقة والساعة خمسة واربعين دقيقة وبعدين الساعة تمانية الا ربع الساعه سبعه و تلت']
+    # txts = ['يوم التلات تلاتة حداشر الفين وعشرة']
+    # txts = ['ورقم اتنين تسعة سبعة خمسة حداشر مية وعشرين سبعة']
+    # txts = ['حضر الاستاذ محمد عيد عن المدعي بتوكيل رقم الف مية تمانية وتسعين الف عشرين اتنين وعشرين ورقم مليون وميتين الف وخمسة ثم رقم الف ميتين ستة وسبعين ورقم اتنين تسعة سبعة خمسة حداشر مية وعشرين سبعة']
     # txts = ['حضر الاستاذ محمد عيد عن المدعي بتوكيل رقم الف تلتمية تمانية وتسعين الف عشرين اتنين وعشرين ']
-    # txts = ['كان عندي في خمسة وعشرين اتناشر عشرين عشرين وبعدين حداشر تمانية الفين وعشرة']
+    # txts = ['الساعه تلاته ونص']
     txts = prepare_input(txts)
 
     final_txts = []

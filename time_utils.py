@@ -124,7 +124,7 @@ def get_time(new_wordlist, number_flag_list):
     else:
         if state == "HOUR" or state == "MINUTE":
             time_sentences.append(time_sent)
-            end_indices.append(i-1)
+            end_indices.append(i)
             for t_i in times_indices:
                 times_flags_list[t_i] = 1
             

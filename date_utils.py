@@ -5,7 +5,7 @@ from number import detect_number_phrases_position
 from number import text2number
 from number_const import UNITS_ORDINAL_WORDS, UNITS_ORDINAL_WORDS_FEMININ, inv_UNITS_ORDINAL_WORDS_FEMININ, inv_UNITS_ORDINAL_WORDS
 from dates_const import ACCEPT_NUMBER_PREFIX, MONTH_WORDS, YEARS_REPLACE, SPECIAL_SESSIONS_WORDS
-from dates_const import DATE_FILL_WORDS, DAY_DEFINING_WORDS, TEN_PREFIX, DATE_TRIGGERS
+from dates_const import DATE_FILL_WORDS, DAY_DEFINING_WORDS, TEN_PREFIX, DATE_TRIGGERS, NUMBER_TRIGGERS
 import re
 
 def prepare_txt(txt):
@@ -99,11 +99,11 @@ def get_separate_numbers(wordlist, original_wordlist):
                         temp_word = wordlist[i]
                         temp_original_word = original_wordlist[i]
                 # elif is_complication(wordlist[i-1]) or is_complication(wordlist[i]):
-                elif is_complication(wordlist[i-1]):
+                elif is_complication(wordlist[i-1]) and text2number(wordlist[i]) < text2number(wordlist[i-1]):
                     temp_word += (" " + wordlist[i])
                     temp_original_word += (" " + original_wordlist[i])
                 elif (wordlist[i] in ACCEPT_NUMBER_PREFIX) and (text2number(wordlist[i]) > text2number(wordlist[i-1])) and (text2number(wordlist[i-1])!=0):
-                    if (wordlist[i] == u'عشر' or wordlist[i] == u'عشرة' or wordlist[i] == u'عشره')\
+                    if (wordlist[i] == u'عشر' or wordlist[i] == u'عشرة' or wordlist[i] == u'عشره' or wordlist[i] == u'مية' or wordlist[i] == u'مئة' or wordlist[i] == u'مائة' or wordlist[i] == u'الف' or wordlist[i] == u'ألف')\
                         and\
                         (((wordlist[i-1] not in TEN_PREFIX) and (wordlist[i-1][2:] not in TEN_PREFIX)  and  (wordlist[i-1][1:] not in TEN_PREFIX))\
                         or (i>1 and wordlist[i-2] in DAY_DEFINING_WORDS)) :
@@ -197,7 +197,8 @@ def get_separate_repeated_numbers(new_wordlist, number_flag_list):
     for i in range(len(new_wordlist)):
         if state == "START":
             repeated_num_sent = ""
-            if u'رقم' in new_wordlist[i] and i+1<len(new_wordlist) and number_flag_list[i+1] == 1:
+            if any(word in new_wordlist[i] for word in NUMBER_TRIGGERS) and i+1<len(new_wordlist) and number_flag_list[i+1] == 1:
+            # if (u'رقم' in new_wordlist[i] or u'قومي' in new_wordlist[i] or u'بطاقة' in new_wordlist[i]) and i+1<len(new_wordlist) and number_flag_list[i+1] == 1:
                 state = "TRIGGERED"
         elif state == "TRIGGERED":
             if number_flag_list[i] == 1:
@@ -205,12 +206,17 @@ def get_separate_repeated_numbers(new_wordlist, number_flag_list):
                 repeated_num_sent += " " + new_wordlist[i]
             elif repeated_num_sent:
                 repeated_num_sentences.append(repeated_num_sent)
+                repeated_num_sent = ""
                 end_indices.append(i-1)
-                state = "START"
+                repeated_num_sent = ""
+                if any(word in new_wordlist[i] for word in NUMBER_TRIGGERS) and i+1<len(new_wordlist) and number_flag_list[i+1] == 1:
+                # if (u'رقم' in new_wordlist[i] or u'قومي' in new_wordlist[i] or u'بطاقة' in new_wordlist[i]) and i+1<len(new_wordlist) and number_flag_list[i+1] == 1:
+                    state = "TRIGGERED"
+                else: state = "START"
     else:
         if repeated_num_sent:
             repeated_num_sentences.append(repeated_num_sent)
-            end_indices.append(i-1)
+            end_indices.append(i)
     return repeated_num_sentences, repeated_num_flags_list, end_indices
 
 
@@ -223,7 +229,7 @@ def get_dates(new_wordlist, number_flag_list, special_session_flag_list):
     for i in range(len(new_wordlist)):
         if special_session_flag_list[i] == 1: continue
         if state == "START":
-            if new_wordlist[i] in DATE_TRIGGERS:
+            if new_wordlist[i] in DATE_TRIGGERS or (new_wordlist[i][0] == u'و' and new_wordlist[i][1:] in DATE_TRIGGERS) or (new_wordlist[i] in DAY_DEFINING_WORDS and new_wordlist[i].startswith(u'ال')):
                 state = "TRIGGERED"
         elif state == "TRIGGERED":
             # if repeated_nums_flag and not repeated_num_sent == "":
@@ -247,7 +253,10 @@ def get_dates(new_wordlist, number_flag_list, special_session_flag_list):
                         date_sent += new_wordlist[i]
                         dates_indices.append(i)
                         state = "DAY"
-            if state != "DAY": state = "START"
+            if state != "DAY": 
+                if new_wordlist[i] in DATE_TRIGGERS or (new_wordlist[i][0] == u'و' and new_wordlist[i][1:] in DATE_TRIGGERS) or (new_wordlist[i] in DAY_DEFINING_WORDS and new_wordlist[i].startswith(u'ال')):
+                    state = "TRIGGERED"
+                else: state = "START"
                 # else:
                 #     repeated_num_sent += new_wordlist[i]
                 #     state = "REPEATED NUMS"
@@ -257,7 +266,9 @@ def get_dates(new_wordlist, number_flag_list, special_session_flag_list):
                 # if not all(s.isnumeric() for s in repeated_num_sent.split()):
                 #     repeated_nums.append(repeated_num_sent)
                 #     repeated_nums_flag = 1
-                state = "START"
+                if new_wordlist[i] in DATE_TRIGGERS or (new_wordlist[i][0] == u'و' and new_wordlist[i][1:] in DATE_TRIGGERS) or (new_wordlist[i] in DAY_DEFINING_WORDS and new_wordlist[i].startswith(u'ال')):
+                    state = "TRIGGERED"
+                else: state = "START"
             # elif number_flag_list[i]==1 and (text2number(new_wordlist[i]) < 0 or text2number(new_wordlist[i]) > 12):
             #     date_sent += " " + new_wordlist[i]
             #     state = "REPEATED NUMS"
@@ -267,13 +278,18 @@ def get_dates(new_wordlist, number_flag_list, special_session_flag_list):
                 if number_flag_list[i]==1 or new_wordlist[i] in MONTH_WORDS:
                     state = "MONTH"
             else:
-                state = "START"
+                if new_wordlist[i] in DATE_TRIGGERS or (new_wordlist[i][0] == u'و' and new_wordlist[i][1:] in DATE_TRIGGERS) or (new_wordlist[i] in DAY_DEFINING_WORDS and new_wordlist[i].startswith(u'ال')):
+                    state = "TRIGGERED"
+                else: state = "START"
         elif state == "MONTH":
             if number_flag_list[i]==0 and not new_wordlist[i] in DATE_FILL_WORDS:
-                # date_sentences.append(date_sent)
-                # for d_i in dates_indices:
-                #     dates_flags_list[d_i] = 1
-                state = "START"
+                date_sentences.append(date_sent)
+                for d_i in dates_indices:
+                    dates_flags_list[d_i] = 1
+                end_indices.append(i-1)
+                if new_wordlist[i] in DATE_TRIGGERS or (new_wordlist[i][0] == u'و' and new_wordlist[i][1:] in DATE_TRIGGERS) or (new_wordlist[i] in DAY_DEFINING_WORDS and new_wordlist[i].startswith(u'ال')):
+                    state = "TRIGGERED"
+                else: state = "START"
             else:
                 date_sent += " " + new_wordlist[i]
                 dates_indices.append(i)
@@ -283,7 +299,9 @@ def get_dates(new_wordlist, number_flag_list, special_session_flag_list):
                         end_indices.append(i)
                         for d_i in dates_indices:
                             dates_flags_list[d_i] = 1
-                    state = "START"
+                    if new_wordlist[i] in DATE_TRIGGERS or (new_wordlist[i][0] == u'و' and new_wordlist[i][1:] in DATE_TRIGGERS) or (new_wordlist[i] in DAY_DEFINING_WORDS and new_wordlist[i].startswith(u'ال')):
+                        state = "TRIGGERED"
+                    else: state = "START"
                     # else:
                     #     state = "REPEATED NUMS"
         elif state == "YEAR":
@@ -292,7 +310,9 @@ def get_dates(new_wordlist, number_flag_list, special_session_flag_list):
                     dates_flags_list[d_i] = 1
                 date_sentences.append(date_sent)
                 end_indices.append(i-1)
-            state == "START"
+            if new_wordlist[i] in DATE_TRIGGERS or (new_wordlist[i][0] == u'و' and new_wordlist[i][1:] in DATE_TRIGGERS) or (new_wordlist[i] in DAY_DEFINING_WORDS and new_wordlist[i].startswith(u'ال')):
+                    state = "TRIGGERED"
+            else: state = "START"
             # else:
             #     repeated_num_sent = date_sent + " " + new_wordlist[i]
             #     state = "REPEATED NUMS"
@@ -309,7 +329,7 @@ def get_dates(new_wordlist, number_flag_list, special_session_flag_list):
     else:
         if state == "MONTH" or state == "YEAR":
             date_sentences.append(date_sent)
-            end_indices.append(i-1)
+            end_indices.append(i)
             for d_i in dates_indices:
                 dates_flags_list[d_i] = 1
         # if state == "DAY":
