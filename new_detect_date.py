@@ -141,7 +141,7 @@ def main():
     t = f.read()
     f.close()
     txts.extend(t.split('\n'))
-    # txts = ['يوم التلات تلاتة حداشر الفين وعشرة']
+    txts = ['رقم متين اتنين وخمسين ورقم ميتين وخمسين']
     # txts = ['ورقم اتنين تسعة سبعة خمسة حداشر مية وعشرين سبعة']
     # txts = ['حضر الاستاذ محمد عيد عن المدعي بتوكيل رقم الف مية تمانية وتسعين الف عشرين اتنين وعشرين ورقم مليون وميتين الف وخمسة ثم رقم الف ميتين ستة وسبعين ورقم اتنين تسعة سبعة خمسة حداشر مية وعشرين سبعة']
     # txts = ['حضر الاستاذ محمد عيد عن المدعي بتوكيل رقم الف تلتمية تمانية وتسعين الف عشرين اتنين وعشرين ']
@@ -153,9 +153,9 @@ def main():
         new_txt, date_flag, year_flag, time_flag = process_dates(txt)
         print(new_txt)
         final_txts.append(new_txt)
-    f = open("test/test_out.txt", 'w', encoding='utf-8')
-    f.write('\n'.join(final_txts))
-    f.close()
+    # f = open("test/test_out.txt", 'w', encoding='utf-8')
+    # f.write('\n'.join(final_txts))
+    # f.close()
 
 
 if __name__ == '__main__':

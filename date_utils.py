@@ -55,7 +55,7 @@ def prepare_txt(txt):
 
 def is_complication(word):
     is_comp = 0
-    if u'مية' in word or u'مائة' in word or u'مئة' in word or u'ميه' in word or u'مائه' in word or u'مئه' in word or u'ميتين' in word or u'مئتين' in word or u'مائتين' in word:
+    if u'مية' in word or u'مائة' in word or u'مئة' in word or u'ميه' in word or u'مائه' in word or u'مئه' in word or u'ميتين' in word or u'مئتين' in word or u'مائتين' in word or u'متين' in word:
         is_comp = 1
     if word.endswith(u'الاف') or word.endswith(u'آلاف') or word.endswith(u'ألاف') or word.endswith(u'تلاف') or word.endswith(u'الف') or word.endswith(u'ألف') or word.endswith(u'ألفين') or word.endswith(u'الفين'):
         is_comp = 1
