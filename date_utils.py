@@ -103,10 +103,11 @@ def get_separate_numbers(wordlist, original_wordlist):
                     temp_word += (" " + wordlist[i])
                     temp_original_word += (" " + original_wordlist[i])
                 elif (wordlist[i] in ACCEPT_NUMBER_PREFIX) and (text2number(wordlist[i]) > text2number(wordlist[i-1])) and (text2number(wordlist[i-1])!=0):
-                    if (wordlist[i] == u'عشر' or wordlist[i] == u'عشرة' or wordlist[i] == u'عشره' or wordlist[i] == u'مية' or wordlist[i] == u'مئة' or wordlist[i] == u'مائة' or wordlist[i] == u'الف' or wordlist[i] == u'ألف')\
+                    if ((wordlist[i] == u'عشر' or wordlist[i] == u'عشرة' or wordlist[i] == u'عشره' or wordlist[i] == u'مية' or wordlist[i] == u'مئة' or wordlist[i] == u'مائة')\
                         and\
                         (((wordlist[i-1] not in TEN_PREFIX) and (wordlist[i-1][2:] not in TEN_PREFIX)  and  (wordlist[i-1][1:] not in TEN_PREFIX))\
-                        or (i>1 and wordlist[i-2] in DAY_DEFINING_WORDS)) :
+                        or (i>1 and wordlist[i-2] in DAY_DEFINING_WORDS)))\
+                        or ((wordlist[i] == u'الف' or wordlist[i] == u'ألف') and not ( text2number(wordlist[i-1])>10 or text2number(wordlist[i-1][1:])>10 or text2number(wordlist[i-1][2:])>10)):
                         separate_numbers.append(temp_word)
                         new_wordlist.append(temp_word)
                         new_original_wordlist.append(temp_original_word)

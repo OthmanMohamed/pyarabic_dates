@@ -133,15 +133,16 @@ def format_chunk(chunk):
 
 def main():
     txts = []
-    file_path = "/data/detect_dates/pyarabic_dates/test/nyaba_sample.txt"
-    # file_path = "/data/detect_dates/pyarabic_dates/test/dummy_test.txt"
+    # file_path = "/data/detect_dates/pyarabic_dates/test/nyaba_sample.txt"
+    file_path = "/data/detect_dates/pyarabic_dates/test/dummy_test.txt"
     # file_path = "/data/Zenhom_demo_files/demo_files/combined.txt"
     # file_path = sys.argv[1]
     f = open(file_path, encoding='utf-8')
     t = f.read()
     f.close()
     txts.extend(t.split('\n'))
-    txts = ['رقم متين اتنين وخمسين ورقم ميتين وخمسين']
+    # txts = ['بطاقة تلاتاشر ألف خمسومية وعشرين']
+    # txts = ["بتاريخ خمسة تمانية الف تسعمية اتنين وستين"]
     # txts = ['ورقم اتنين تسعة سبعة خمسة حداشر مية وعشرين سبعة']
     # txts = ['حضر الاستاذ محمد عيد عن المدعي بتوكيل رقم الف مية تمانية وتسعين الف عشرين اتنين وعشرين ورقم مليون وميتين الف وخمسة ثم رقم الف ميتين ستة وسبعين ورقم اتنين تسعة سبعة خمسة حداشر مية وعشرين سبعة']
     # txts = ['حضر الاستاذ محمد عيد عن المدعي بتوكيل رقم الف تلتمية تمانية وتسعين الف عشرين اتنين وعشرين ']
@@ -153,9 +154,9 @@ def main():
         new_txt, date_flag, year_flag, time_flag = process_dates(txt)
         print(new_txt)
         final_txts.append(new_txt)
-    # f = open("test/test_out.txt", 'w', encoding='utf-8')
-    # f.write('\n'.join(final_txts))
-    # f.close()
+    f = open("test/test_out.txt", 'w', encoding='utf-8')
+    f.write('\n'.join(final_txts))
+    f.close()
 
 
 if __name__ == '__main__':
