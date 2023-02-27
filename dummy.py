@@ -1,4 +1,6 @@
 from __future__ import unicode_literals
+# from datasets import tqdm
+from tqdm import tqdm
 import pyarabic.number
 from pyarabic import araby
 import re
@@ -97,12 +99,14 @@ def process_file(f):
 
 def main():
     combined = ""
-    files = glob.glob("/home/o.mohamed/Downloads/legal_data/scrapped_books/*")
+    # files = glob.glob("/home/o.mohamed/Downloads/legal_data/scrapped_books/*")
+    files = glob.glob("/data/detect_dates/pyarabic_dates/*C4.txt")
     for f in files:
         try:
             out = process_file(f)
             combined += out
-            out_filename = os.path.join(os.path.dirname(f), "processed", os.path.basename(f)[:-4]+"_processed.txt")
+            # out_filename = os.path.join(os.path.dirname(f), "processed", os.path.basename(f)[:-4]+"_processed.txt")
+            out_filename = os.path.join(os.path.dirname(f), os.path.basename(f)[:-4]+"_processed.txt")
             out_file = open(out_filename, 'w')
             out_file.write(out)
             out_file.close()
@@ -110,11 +114,24 @@ def main():
             print("ERROR ARISED IN FILE : ", f)
             # print(os.path.basename(f))
             # print(os.path.dirname(f))
-    out_filename = os.path.join(os.path.dirname(f), "processed", "combined.txt")
-    out_file = open(out_filename, 'w')
-    out_file.write(combined)
-    out_file.close()
+    # out_filename = os.path.join(os.path.dirname(f), "processed", "combined.txt")
+    # out_file = open(out_filename, 'w')
+    # out_file.write(combined)
+    # out_file.close()
     # process_file("/home/o.mohamed/Downloads/legal_data/scrapped_books/0.txt")
+
+    words = ["حافظة", "توكيل", "أصل", "قسم", "دعوى"]
+    words.extend(["الحافظة", "التوكيل", "القسم", "الدعوى"])
+    global_counter = 0
+    for w in words:
+        counter = 0
+        for l in tqdm(out.split('\n')):
+            if w in l.split():
+                counter += 1
+                global_counter += 1
+        print(f'{w}\t {counter}')
+    print(global_counter)
+
 
 if __name__ == '__main__':
     main()

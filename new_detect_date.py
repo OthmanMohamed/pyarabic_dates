@@ -2,6 +2,7 @@ from date_utils import get_separate_repeated_numbers, prepare_txt, get_separate_
 from time_utils import get_time, extract_time
 from herz_utils import get_herz, extract_herz
 from number import detect_number_phrases_position, text2number
+from process_special_words import process as process_special_words
 import araby
 from dates_const import DATE_FILL_WORDS, MONTH_WORDS, DAY_DEFINING_WORDS
 import re
@@ -121,37 +122,43 @@ def prepare_input(txt):
             temp_t = ""
     return return_txts
 
-def format_chunk(chunk):
+def format_chunk(chunk, process_nums = 1, process_boost_words = 1):
     txts = []
     txts.extend(chunk.split('\n'))
     txts = prepare_input(txts)
     final_txts = []
     for txt in txts:
-        new_txt, date_flag, year_flag, time_flag = process_dates(txt)
+        if process_boost_words == '1':
+            new_txt = process_special_words(txt)
+        else: new_txt = txt
+        if process_nums == '1':
+            new_txt, date_flag, year_flag, time_flag = process_dates(new_txt) 
         final_txts.append(new_txt)
     return ('\n'.join(final_txts))
 
 def main():
     txts = []
     # file_path = "/data/detect_dates/pyarabic_dates/test/nyaba_sample.txt"
-    file_path = "/data/detect_dates/pyarabic_dates/test/dummy_test.txt"
+    # file_path = "/data/detect_dates/pyarabic_dates/test/dummy_test.txt"
     # file_path = "/data/Zenhom_demo_files/demo_files/combined.txt"
-    # file_path = sys.argv[1]
+    file_path = sys.argv[1]
+    process_nums, process_boost_words = [sys.argv[2], sys.argv[3]]
     f = open(file_path, encoding='utf-8')
     t = f.read()
     f.close()
     txts.extend(t.split('\n'))
-    # txts = ['بطاقة تلاتاشر ألف خمسومية وعشرين']
+    # txts = ['حضر الاستاذ بتوكيد رقم خمسة اتنين سبعة عشرة وطلب قصر الدعوة']
     # txts = ["بتاريخ خمسة تمانية الف تسعمية اتنين وستين"]
     # txts = ['ورقم اتنين تسعة سبعة خمسة حداشر مية وعشرين سبعة']
     # txts = ['حضر الاستاذ محمد عيد عن المدعي بتوكيل رقم الف مية تمانية وتسعين الف عشرين اتنين وعشرين ورقم مليون وميتين الف وخمسة ثم رقم الف ميتين ستة وسبعين ورقم اتنين تسعة سبعة خمسة حداشر مية وعشرين سبعة']
     # txts = ['حضر الاستاذ محمد عيد عن المدعي بتوكيل رقم الف تلتمية تمانية وتسعين الف عشرين اتنين وعشرين ']
     # txts = ['الساعه تلاته ونص']
-    txts = prepare_input(txts)
+    # txts = prepare_input(txts)
 
     final_txts = []
     for txt in txts:
-        new_txt, date_flag, year_flag, time_flag = process_dates(txt)
+        # new_txt, date_flag, year_flag, time_flag = process_dates(txt)
+        new_txt = format_chunk(txt, process_nums, process_boost_words)
         print(new_txt)
         final_txts.append(new_txt)
     f = open("test/test_out.txt", 'w', encoding='utf-8')
